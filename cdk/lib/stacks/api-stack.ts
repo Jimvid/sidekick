@@ -1,15 +1,22 @@
 import * as cdk from "aws-cdk-lib";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import { Construct } from "constructs";
 import { ApiWithDynamo } from "../constructs/api-with-dynamo";
+import { EnvironmentConfig } from "../config";
+
+interface ApiStackProps extends cdk.StackProps {
+  config: EnvironmentConfig;
+  certificate: acm.ICertificate;
+}
 
 export class ApiStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
     new ApiWithDynamo(this, "ApiWithDynamo", {
-      domainName: "api.sidekick.jimvid.xyz",
-      certificateArn:
-        "arn:aws:acm:us-east-1:211125707553:certificate/96aa108c-f031-4efc-b522-1b849005aa83",
+      domainName: props.config.apiDomainName,
+      certificate: props.certificate,
+      config: props.config,
     });
   }
 }

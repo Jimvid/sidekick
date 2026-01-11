@@ -1,15 +1,21 @@
 import * as cdk from "aws-cdk-lib";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import { Construct } from "constructs";
 import { StaticWebsiteHosting } from "../constructs/static-website-hosting";
+import { EnvironmentConfig } from "../config";
+
+interface FrontendStackProps extends cdk.StackProps {
+  config: EnvironmentConfig;
+  certificate: acm.ICertificate;
+}
 
 export class FrontendStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: FrontendStackProps) {
     super(scope, id, props);
 
     new StaticWebsiteHosting(this, "StaticWebsiteHosting", {
-      domainName: "sidekick.jimvid.xyz",
-      certificateArn:
-        "arn:aws:acm:us-east-1:211125707553:certificate/729577ea-6ecb-4453-a171-93c5a68034aa",
+      domainName: props.config.frontendDomainName,
+      certificate: props.certificate,
     });
   }
 }

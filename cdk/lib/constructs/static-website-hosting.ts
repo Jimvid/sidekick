@@ -4,7 +4,7 @@ import { Distribution, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
 import { S3StaticWebsiteOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
-import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
 import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 
@@ -12,7 +12,7 @@ const path = "../apps/web/dist";
 
 interface StaticWebsiteHostingProps extends StackProps {
   domainName: string;
-  certificateArn: string; // Required: certificate ARN from us-east-1
+  certificate: acm.ICertificate;
 }
 
 export class StaticWebsiteHosting extends Construct {
@@ -20,20 +20,13 @@ export class StaticWebsiteHosting extends Construct {
     super(scope, id);
 
     // Domain name
-    const { domainName, certificateArn } = props;
+    const { domainName, certificate } = props;
     const rootDomain = domainName.split(".").slice(-2).join(".");
     const subdomainPart = domainName.replace(`.${rootDomain}`, "");
 
     const hostedZone = HostedZone.fromLookup(this, "HostedZone", {
       domainName: rootDomain,
     });
-
-    // Import SSL certificate from ARN
-    const certificate = Certificate.fromCertificateArn(
-      this,
-      "Certificate",
-      certificateArn,
-    );
 
     // Hosting bucket
     const bucket = new Bucket(this, "FrontendBucket", {
@@ -85,19 +78,16 @@ export class StaticWebsiteHosting extends Construct {
     new CfnOutput(this, "CloudFrontURL", {
       value: distribution.domainName,
       description: "CloudFront Distribution URL",
-      exportName: "CloudFrontURL",
     });
 
     new CfnOutput(this, "CustomDomainURL", {
       value: `https://${domainName}`,
       description: "Custom Domain URL",
-      exportName: "CustomDomainURL",
     });
 
     new CfnOutput(this, "BucketName", {
       value: bucket.bucketName,
       description: "Hosting bucket for frontend",
-      exportName: "frontend-bucket",
     });
   }
 }

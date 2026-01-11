@@ -6,12 +6,13 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as route53Targets from "aws-cdk-lib/aws-route53-targets";
 import { Construct } from "constructs";
-import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
-import { getConfig } from "../config";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import { EnvironmentConfig } from "../config";
 
 interface ApiStackProps extends cdk.StackProps {
   domainName: string;
-  certificateArn: string;
+  certificate: acm.ICertificate;
+  config: EnvironmentConfig;
 }
 
 export class ApiStack extends cdk.Stack {}
@@ -20,7 +21,6 @@ export class ApiWithDynamo extends Construct {
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id);
 
-    const config = getConfig();
     const dlq = new sqs.Queue(this, "ApiLambdaDlq");
 
     // DynamoDB - Single Table Design
@@ -38,19 +38,12 @@ export class ApiWithDynamo extends Construct {
     });
 
     // Setup domain
-    const { domainName, certificateArn } = props;
+    const { domainName, certificate } = props;
     const rootDomain = domainName.split(".").slice(-2).join(".");
     const subdomainPart = domainName.replace(`.${rootDomain}`, "");
     const hostedZone = route53.HostedZone.fromLookup(this, "HostedZone", {
       domainName: rootDomain,
     });
-
-    // Import SSL certificate from ARN
-    const certificate = Certificate.fromCertificateArn(
-      this,
-      "Certificate",
-      certificateArn,
-    );
 
     const customDomain = new apigateway.DomainName(this, "CustomDomain", {
       domainName: props.domainName,
@@ -78,7 +71,7 @@ export class ApiWithDynamo extends Construct {
       }),
       environment: {
         TABLE_NAME: table.tableName,
-        CLERK_SECRET: config.CLERK_SECRET,
+        CLERK_SECRET: props.config.clerkSecret,
       },
     });
     // CloudWatch

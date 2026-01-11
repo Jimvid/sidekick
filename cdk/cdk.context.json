@@ -9,5 +9,9 @@
   "hosted-zone:account=211125707553:domainName=jimvid.xyz:region=eu-north-1": {
     "Id": "/hostedzone/Z017245011UI3VANIEC48",
     "Name": "jimvid.xyz."
+  },
+  "hosted-zone:account=211125707553:domainName=jimvid.xyz:region=us-east-1": {
+    "Id": "/hostedzone/Z017245011UI3VANIEC48",
+    "Name": "jimvid.xyz."
   }
 }

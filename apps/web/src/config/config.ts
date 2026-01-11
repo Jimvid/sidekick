@@ -1,3 +1,3 @@
 export const config = {
-  apiUrl: 'https://api.sidekick.jimvid.xyz',
+  apiUrl: 'https://dev.api.sidekick.jimvid.xyz',
 }
