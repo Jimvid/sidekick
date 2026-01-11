@@ -1,0 +1,13 @@
+{
+  "hosted-zone:account=211125707553:domainName=sidekick.jimvid.xyz:region=eu-north-1": {
+    "Id": "/hostedzone/Z01680713DE3MET01GXTS",
+    "Name": "sidekick.jimvid.xyz"
+  },
+  "acknowledged-issue-numbers": [
+    34892
+  ],
+  "hosted-zone:account=211125707553:domainName=jimvid.xyz:region=eu-north-1": {
+    "Id": "/hostedzone/Z017245011UI3VANIEC48",
+    "Name": "jimvid.xyz."
+  }
+}
