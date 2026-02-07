@@ -65,7 +65,7 @@ export class ApiWithDynamo extends Construct {
           command: [
             "bash",
             "-c",
-            "export GOCACHE=/tmp/go-cache && export GOMODCACHE=/tmp/go-mod && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o /asset-output/bootstrap ./cmd",
+            "export GOCACHE=/tmp/go-cache && export GOMODCACHE=/tmp/go-mod && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o /asset-output/bootstrap ./cmd/rest",
           ],
         },
       }),

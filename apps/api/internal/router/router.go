@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/jimvid/sidekick/config"
-	"github.com/jimvid/sidekick/internal/api/exampleFeature"
+	"github.com/jimvid/sidekick/internal/climbs"
+	"github.com/jimvid/sidekick/internal/config"
 	"github.com/jimvid/sidekick/internal/database"
 	"github.com/jimvid/sidekick/internal/middleware"
 )
