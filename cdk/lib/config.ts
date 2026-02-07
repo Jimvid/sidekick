@@ -7,6 +7,8 @@ export type Environment = "dev" | "prod";
 
 export interface EnvironmentConfig {
   env: Environment;
+  rootDomainName: string;
+  appDomainName: string;
   apiDomainName: string;
   frontendDomainName: string;
   clerkSecret: string;
@@ -15,12 +17,16 @@ export interface EnvironmentConfig {
 const configs: Record<Environment, EnvironmentConfig> = {
   dev: {
     env: "dev",
+    rootDomainName: "jimvid.xyz",
+    appDomainName: "sidekick.jimvid.xyz",
     apiDomainName: "dev.api.sidekick.jimvid.xyz",
     frontendDomainName: "dev.sidekick.jimvid.xyz",
     clerkSecret: process.env.CLERK_SECRET || "",
   },
   prod: {
     env: "prod",
+    rootDomainName: "jimvid.xyz",
+    appDomainName: "sidekick.jimvid.xyz",
     apiDomainName: "api.sidekick.jimvid.xyz",
     frontendDomainName: "sidekick.jimvid.xyz",
     clerkSecret: process.env.CLERK_SECRET || "",

@@ -23,7 +23,10 @@ const certStack = new cdk.Stack(app, `SidekickCertificate${suffix}`, {
   crossRegionReferences: true,
 });
 
-const sharedCert = new SharedCertificate(certStack, "SharedCertificate");
+const sharedCert = new SharedCertificate(certStack, "SharedCertificate", {
+  rootDomainName: config.rootDomainName,
+  appDomainName: config.appDomainName,
+});
 
 // S3 bucket for static website hosting
 new FrontendStack(app, `SidekickFrontend${suffix}`, {
