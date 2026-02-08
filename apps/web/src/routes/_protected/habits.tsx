@@ -1,10 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { HabitTracker } from '@/components/habits/HabitTracker'
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_protected/habits')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  return <HabitTracker />
+  return <Outlet />
 }

@@ -1,16 +1,19 @@
-export type HabitType = 'good' | 'bad'
-
 export interface Habit {
   id: string
   name: string
-  type: HabitType
+  description: string
   color: string
   count: number
 }
 
+export interface HabitLogEntry {
+  habitId: string
+  note?: string
+}
+
 export interface HabitLog {
   date: string
-  habitIds: Array<string>
+  entries: Array<HabitLogEntry>
 }
 
 export interface QuarterInfo {
