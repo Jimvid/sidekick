@@ -26,11 +26,11 @@ export class ApiWithDynamo extends Construct {
     // DynamoDB - Single Table Design
     const table = new cdk.aws_dynamodb.Table(this, "Sidekick", {
       partitionKey: {
-        name: "UserId",
+        name: "userId",
         type: cdk.aws_dynamodb.AttributeType.STRING,
       },
       sortKey: {
-        name: "ItemId",
+        name: "itemId",
         type: cdk.aws_dynamodb.AttributeType.STRING,
       },
       removalPolicy: cdk.RemovalPolicy.DESTROY, // WARNING: Deletes table on stack deletion

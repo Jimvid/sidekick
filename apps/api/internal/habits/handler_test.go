@@ -25,16 +25,22 @@ func setupHandler(t *testing.T) (*HabitHandler, *chi.Mux) {
 	}
 
 	r := chi.NewRouter()
-	r.Post("/habits", handler.Create)
-	r.Get("/habits", handler.GetAll)
-	r.Get("/habits/{habitId}", handler.FindById)
-	r.Delete("/habits/{habitId}", handler.Delete)
-	r.Put("/habits/{habitId}", handler.Update)
+	r.Post("/habits", handler.CreateHabit)
+	r.Get("/habits", handler.GetAllHabits)
+	r.Get("/habits/{habitId}", handler.FindHabitById)
+	r.Delete("/habits/{habitId}", handler.DeleteHabit)
+	r.Put("/habits/{habitId}", handler.UpdateHabit)
+
+	r.Post("/habit-logs", handler.CreateHabitLog)
+	r.Get("/habit-logs", handler.GetAllHabitLogs)
+	r.Get("/habit-logs/{id}", handler.FindHabitLogById)
+	r.Delete("/habit-logs/{id}", handler.DeleteHabitLog)
+	r.Put("/habit-logs/{id}", handler.UpdateHabitLog)
 
 	return handler, r
 }
 
-func TestHandlerCreate(t *testing.T) {
+func TestHandlerCreateHabit(t *testing.T) {
 	_, router := setupHandler(t)
 
 	t.Run("valid request", func(t *testing.T) {
@@ -73,7 +79,7 @@ func TestHandlerCreate(t *testing.T) {
 	})
 }
 
-func TestHandlerGetAll(t *testing.T) {
+func TestHandlerGetAllHabits(t *testing.T) {
 	_, router := setupHandler(t)
 
 	t.Run("empty list", func(t *testing.T) {
@@ -122,7 +128,7 @@ func TestHandlerGetAll(t *testing.T) {
 	})
 }
 
-func TestHandlerFindById(t *testing.T) {
+func TestHandlerFindHabitById(t *testing.T) {
 	_, router := setupHandler(t)
 
 	// Create a habit first
@@ -165,7 +171,7 @@ func TestHandlerFindById(t *testing.T) {
 	})
 }
 
-func TestHandlerDelete(t *testing.T) {
+func TestHandlerDeleteHabit(t *testing.T) {
 	_, router := setupHandler(t)
 
 	// Create a habit first
@@ -201,7 +207,7 @@ func TestHandlerDelete(t *testing.T) {
 	})
 }
 
-func TestHandlerUpdate(t *testing.T) {
+func TestHandlerUpdateHabit(t *testing.T) {
 	_, router := setupHandler(t)
 
 	// Create a habit first
@@ -239,6 +245,227 @@ func TestHandlerUpdate(t *testing.T) {
 
 	t.Run("invalid JSON", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPut, "/habits/"+created.ID, strings.NewReader("not json"))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusBadRequest {
+			t.Fatalf("expected status %d, got %d", http.StatusBadRequest, w.Code)
+		}
+	})
+}
+
+func TestHandlerCreateHabitLog(t *testing.T) {
+	_, router := setupHandler(t)
+
+	t.Run("valid request", func(t *testing.T) {
+		body := `{"habitId":"habit-1","date":"2026-02-08","note":"Morning run"}`
+		req := httptest.NewRequest(http.MethodPost, "/habit-logs", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusCreated {
+			t.Fatalf("expected status %d, got %d", http.StatusCreated, w.Code)
+		}
+
+		var log HabitLogModel
+		json.NewDecoder(w.Body).Decode(&log)
+
+		if log.ID == "" {
+			t.Error("expected log ID to be set")
+		}
+		if log.HabitId != "habit-1" {
+			t.Errorf("expected habitId %q, got %q", "habit-1", log.HabitId)
+		}
+		if log.Date != "2026-02-08" {
+			t.Errorf("expected date %q, got %q", "2026-02-08", log.Date)
+		}
+	})
+
+	t.Run("invalid JSON", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/habit-logs", strings.NewReader("not json"))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusBadRequest {
+			t.Fatalf("expected status %d, got %d", http.StatusBadRequest, w.Code)
+		}
+	})
+}
+
+func TestHandlerGetAllHabitLogs(t *testing.T) {
+	_, router := setupHandler(t)
+
+	t.Run("empty list", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/habit-logs", nil)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+		}
+
+		var logs []HabitLogModel
+		json.NewDecoder(w.Body).Decode(&logs)
+
+		if len(logs) != 0 {
+			t.Errorf("expected 0 logs, got %d", len(logs))
+		}
+	})
+
+	t.Run("returns list", func(t *testing.T) {
+		for _, date := range []string{"2026-02-08", "2026-02-09"} {
+			body := `{"habitId":"h1","date":"` + date + `","note":"test"}`
+			req := httptest.NewRequest(http.MethodPost, "/habit-logs", strings.NewReader(body))
+			req.Header.Set("Content-Type", "application/json")
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+		}
+
+		req := httptest.NewRequest(http.MethodGet, "/habit-logs", nil)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+		}
+
+		var logs []HabitLogModel
+		json.NewDecoder(w.Body).Decode(&logs)
+
+		if len(logs) != 2 {
+			t.Errorf("expected 2 logs, got %d", len(logs))
+		}
+	})
+}
+
+func TestHandlerFindHabitLogById(t *testing.T) {
+	_, router := setupHandler(t)
+
+	// Create a log first
+	body := `{"habitId":"habit-1","date":"2026-02-08","note":"test"}`
+	createReq := httptest.NewRequest(http.MethodPost, "/habit-logs", strings.NewReader(body))
+	createReq.Header.Set("Content-Type", "application/json")
+	createW := httptest.NewRecorder()
+	router.ServeHTTP(createW, createReq)
+
+	var created HabitLogModel
+	json.NewDecoder(createW.Body).Decode(&created)
+
+	t.Run("found", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/habit-logs/"+created.ID, nil)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+		}
+
+		var log HabitLogModel
+		json.NewDecoder(w.Body).Decode(&log)
+
+		if log.HabitId != "habit-1" {
+			t.Errorf("expected habitId %q, got %q", "habit-1", log.HabitId)
+		}
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/habit-logs/does-not-exist", nil)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusNotFound {
+			t.Fatalf("expected status %d, got %d", http.StatusNotFound, w.Code)
+		}
+	})
+}
+
+func TestHandlerDeleteHabitLog(t *testing.T) {
+	_, router := setupHandler(t)
+
+	// Create a log first
+	body := `{"habitId":"habit-1","date":"2026-02-08","note":"test"}`
+	createReq := httptest.NewRequest(http.MethodPost, "/habit-logs", strings.NewReader(body))
+	createReq.Header.Set("Content-Type", "application/json")
+	createW := httptest.NewRecorder()
+	router.ServeHTTP(createW, createReq)
+
+	var created HabitLogModel
+	json.NewDecoder(createW.Body).Decode(&created)
+
+	t.Run("success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodDelete, "/habit-logs/"+created.ID, nil)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+		}
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodDelete, "/habit-logs/does-not-exist", nil)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusInternalServerError {
+			t.Fatalf("expected status %d, got %d", http.StatusInternalServerError, w.Code)
+		}
+	})
+}
+
+func TestHandlerUpdateHabitLog(t *testing.T) {
+	_, router := setupHandler(t)
+
+	// Create a log first
+	body := `{"habitId":"habit-1","date":"2026-02-08","note":"test"}`
+	createReq := httptest.NewRequest(http.MethodPost, "/habit-logs", strings.NewReader(body))
+	createReq.Header.Set("Content-Type", "application/json")
+	createW := httptest.NewRecorder()
+	router.ServeHTTP(createW, createReq)
+
+	var created HabitLogModel
+	json.NewDecoder(createW.Body).Decode(&created)
+
+	t.Run("success", func(t *testing.T) {
+		updateBody := `{"habitId":"habit-2","date":"2026-02-09","note":"updated"}`
+		req := httptest.NewRequest(http.MethodPut, "/habit-logs/"+created.ID, strings.NewReader(updateBody))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+		}
+
+		var updated HabitLogModel
+		json.NewDecoder(w.Body).Decode(&updated)
+
+		if updated.HabitId != "habit-2" {
+			t.Errorf("expected habitId %q, got %q", "habit-2", updated.HabitId)
+		}
+		if updated.Date != "2026-02-09" {
+			t.Errorf("expected date %q, got %q", "2026-02-09", updated.Date)
+		}
+		if updated.Note != "updated" {
+			t.Errorf("expected note %q, got %q", "updated", updated.Note)
+		}
+	})
+
+	t.Run("invalid JSON", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPut, "/habit-logs/"+created.ID, strings.NewReader("not json"))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 

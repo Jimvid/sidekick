@@ -42,11 +42,18 @@ func NewRouter(cfg *config.Config) *chi.Mux {
 	})
 
 	// Habits
-	r.With(middleware.AuthMiddleware).Post("/habits", habitHandler.Create)
-	r.With(middleware.AuthMiddleware).Get("/habits", habitHandler.GetAll)
-	r.With(middleware.AuthMiddleware).Get("/habits/{habitId}", habitHandler.FindById)
-	r.With(middleware.AuthMiddleware).Delete("/habits/{habitId}", habitHandler.Delete)
-	r.With(middleware.AuthMiddleware).Put("/habits/{habitId}", habitHandler.Update)
+	r.With(middleware.AuthMiddleware).Post("/habits", habitHandler.CreateHabit)
+	r.With(middleware.AuthMiddleware).Get("/habits", habitHandler.GetAllHabits)
+	r.With(middleware.AuthMiddleware).Get("/habits/{habitId}", habitHandler.FindHabitById)
+	r.With(middleware.AuthMiddleware).Delete("/habits/{habitId}", habitHandler.DeleteHabit)
+	r.With(middleware.AuthMiddleware).Put("/habits/{habitId}", habitHandler.UpdateHabit)
+
+	// Logs
+	r.With(middleware.AuthMiddleware).Post("/habit-logs", habitHandler.CreateHabitLog)
+	r.With(middleware.AuthMiddleware).Get("/habit-logs", habitHandler.GetAllHabitLogs)
+	r.With(middleware.AuthMiddleware).Get("/habit-logs/{id}", habitHandler.FindHabitLogById)
+	r.With(middleware.AuthMiddleware).Delete("/habit-logs/{id}", habitHandler.DeleteHabitLog)
+	r.With(middleware.AuthMiddleware).Put("/habit-logs/{id}", habitHandler.UpdateHabitLog)
 
 	return r
 }

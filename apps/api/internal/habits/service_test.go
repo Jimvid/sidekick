@@ -5,12 +5,12 @@ import (
 	"time"
 )
 
-func TestServiceCreate(t *testing.T) {
+func TestServiceCreateHabit(t *testing.T) {
 	storage := setupTestDB(t)
 	service := NewHabitService(storage)
 
 	before := time.Now().Unix()
-	habit, err := service.Create("user-1", HabitReq{
+	habit, err := service.CreateHabit("user-1", HabitReq{
 		Name:        "Exercise",
 		Description: "Daily workout",
 		Color:       "#ff0000",
@@ -18,7 +18,7 @@ func TestServiceCreate(t *testing.T) {
 	after := time.Now().Unix()
 
 	if err != nil {
-		t.Fatalf("Create failed: %v", err)
+		t.Fatalf("CreateHabit failed: %v", err)
 	}
 	if habit.ID == "" {
 		t.Fatal("expected UUID to be generated, got empty string")
@@ -40,23 +40,23 @@ func TestServiceCreate(t *testing.T) {
 	}
 
 	// Verify persisted
-	result, err := storage.FindById("user-1", habit.ID)
+	result, err := storage.FindHabitById("user-1", habit.ID)
 	if err != nil {
-		t.Fatalf("FindById after Create failed: %v", err)
+		t.Fatalf("FindHabitById after CreateHabit failed: %v", err)
 	}
 	if result.Name != "Exercise" {
 		t.Errorf("persisted name %q, expected %q", result.Name, "Exercise")
 	}
 }
 
-func TestServiceGetAll(t *testing.T) {
+func TestServiceGetAllHabits(t *testing.T) {
 	storage := setupTestDB(t)
 	service := NewHabitService(storage)
 
 	t.Run("empty", func(t *testing.T) {
-		habits, err := service.GetAll("user-1")
+		habits, err := service.GetAllHabits("user-1")
 		if err != nil {
-			t.Fatalf("GetAll failed: %v", err)
+			t.Fatalf("GetAllHabits failed: %v", err)
 		}
 		if len(habits) != 0 {
 			t.Errorf("expected 0 habits, got %d", len(habits))
@@ -64,12 +64,12 @@ func TestServiceGetAll(t *testing.T) {
 	})
 
 	t.Run("returns results", func(t *testing.T) {
-		service.Create("user-1", HabitReq{Name: "A"})
-		service.Create("user-1", HabitReq{Name: "B"})
+		service.CreateHabit("user-1", HabitReq{Name: "A"})
+		service.CreateHabit("user-1", HabitReq{Name: "B"})
 
-		habits, err := service.GetAll("user-1")
+		habits, err := service.GetAllHabits("user-1")
 		if err != nil {
-			t.Fatalf("GetAll failed: %v", err)
+			t.Fatalf("GetAllHabits failed: %v", err)
 		}
 		if len(habits) != 2 {
 			t.Errorf("expected 2 habits, got %d", len(habits))
@@ -77,16 +77,16 @@ func TestServiceGetAll(t *testing.T) {
 	})
 }
 
-func TestServiceFindById(t *testing.T) {
+func TestServiceFindHabitById(t *testing.T) {
 	storage := setupTestDB(t)
 	service := NewHabitService(storage)
 
-	created, _ := service.Create("user-1", HabitReq{Name: "Read"})
+	created, _ := service.CreateHabit("user-1", HabitReq{Name: "Read"})
 
 	t.Run("found", func(t *testing.T) {
-		habit, err := service.FindById("user-1", created.ID)
+		habit, err := service.FindHabitById("user-1", created.ID)
 		if err != nil {
-			t.Fatalf("FindById failed: %v", err)
+			t.Fatalf("FindHabitById failed: %v", err)
 		}
 		if habit.Name != "Read" {
 			t.Errorf("expected name %q, got %q", "Read", habit.Name)
@@ -94,35 +94,35 @@ func TestServiceFindById(t *testing.T) {
 	})
 
 	t.Run("not found", func(t *testing.T) {
-		_, err := service.FindById("user-1", "does-not-exist")
+		_, err := service.FindHabitById("user-1", "does-not-exist")
 		if err == nil {
 			t.Fatal("expected error for non-existent habit, got nil")
 		}
 	})
 }
 
-func TestServiceDelete(t *testing.T) {
+func TestServiceDeleteHabit(t *testing.T) {
 	storage := setupTestDB(t)
 	service := NewHabitService(storage)
 
-	created, _ := service.Create("user-1", HabitReq{Name: "Exercise"})
+	created, _ := service.CreateHabit("user-1", HabitReq{Name: "Exercise"})
 
-	err := service.Delete("user-1", created.ID)
+	err := service.DeleteHabit("user-1", created.ID)
 	if err != nil {
-		t.Fatalf("Delete failed: %v", err)
+		t.Fatalf("DeleteHabit failed: %v", err)
 	}
 
-	_, err = service.FindById("user-1", created.ID)
+	_, err = service.FindHabitById("user-1", created.ID)
 	if err == nil {
 		t.Fatal("expected error after delete, got nil")
 	}
 }
 
-func TestServiceUpdate(t *testing.T) {
+func TestServiceUpdateHabit(t *testing.T) {
 	storage := setupTestDB(t)
 	service := NewHabitService(storage)
 
-	created, _ := service.Create("user-1", HabitReq{
+	created, _ := service.CreateHabit("user-1", HabitReq{
 		Name:        "Exercise",
 		Description: "Morning run",
 		Color:       "#ff0000",
@@ -130,13 +130,13 @@ func TestServiceUpdate(t *testing.T) {
 
 	time.Sleep(time.Second) // ensure UpdatedAt differs
 
-	updated, err := service.Update("user-1", created.ID, HabitReq{
+	updated, err := service.UpdateHabit("user-1", created.ID, HabitReq{
 		Name:        "Yoga",
 		Description: "Evening yoga",
 		Color:       "#00ff00",
 	})
 	if err != nil {
-		t.Fatalf("Update failed: %v", err)
+		t.Fatalf("UpdateHabit failed: %v", err)
 	}
 
 	if updated.Name != "Yoga" {
@@ -153,5 +153,143 @@ func TestServiceUpdate(t *testing.T) {
 	}
 	if updated.UpdatedAt <= created.UpdatedAt {
 		t.Errorf("expected UpdatedAt (%d) to be greater than original (%d)", updated.UpdatedAt, created.UpdatedAt)
+	}
+}
+
+func TestServiceCreateHabitLog(t *testing.T) {
+	storage := setupTestDB(t)
+	service := NewHabitService(storage)
+
+	log, err := service.CreateHabitLog("user-1", HabitLogReq{
+		HabitId: "habit-1",
+		Date:    "2026-02-08",
+		Note:    "Morning run",
+	})
+
+	if err != nil {
+		t.Fatalf("CreateLog failed: %v", err)
+	}
+	if log.ID == "" {
+		t.Fatal("expected UUID to be generated, got empty string")
+	}
+	if log.HabitId != "habit-1" {
+		t.Errorf("expected habitId %q, got %q", "habit-1", log.HabitId)
+	}
+	if log.Date != "2026-02-08" {
+		t.Errorf("expected date %q, got %q", "2026-02-08", log.Date)
+	}
+	if log.Note != "Morning run" {
+		t.Errorf("expected note %q, got %q", "Morning run", log.Note)
+	}
+
+	// Verify persisted
+	result, err := storage.FindHabitLogById("user-1", log.ID)
+	if err != nil {
+		t.Fatalf("FindLogById after CreateLog failed: %v", err)
+	}
+	if result.HabitId != "habit-1" {
+		t.Errorf("persisted habitId %q, expected %q", result.HabitId, "habit-1")
+	}
+}
+
+func TestServiceGetAllHabitLogs(t *testing.T) {
+	storage := setupTestDB(t)
+	service := NewHabitService(storage)
+
+	t.Run("empty", func(t *testing.T) {
+		logs, err := service.GetAllHabitLogs("user-1")
+		if err != nil {
+			t.Fatalf("GetAllLogs failed: %v", err)
+		}
+		if len(logs) != 0 {
+			t.Errorf("expected 0 logs, got %d", len(logs))
+		}
+	})
+
+	t.Run("returns results", func(t *testing.T) {
+		service.CreateHabitLog("user-1", HabitLogReq{HabitId: "h1", Date: "2026-02-08"})
+		service.CreateHabitLog("user-1", HabitLogReq{HabitId: "h1", Date: "2026-02-09"})
+
+		logs, err := service.GetAllHabitLogs("user-1")
+		if err != nil {
+			t.Fatalf("GetAllLogs failed: %v", err)
+		}
+		if len(logs) != 2 {
+			t.Errorf("expected 2 logs, got %d", len(logs))
+		}
+	})
+}
+
+func TestServiceFindHabitLogById(t *testing.T) {
+	storage := setupTestDB(t)
+	service := NewHabitService(storage)
+
+	created, _ := service.CreateHabitLog("user-1", HabitLogReq{HabitId: "h1", Date: "2026-02-08", Note: "test"})
+
+	t.Run("found", func(t *testing.T) {
+		log, err := service.FindHabitLogById("user-1", created.ID)
+		if err != nil {
+			t.Fatalf("FindLogById failed: %v", err)
+		}
+		if log.HabitId != "h1" {
+			t.Errorf("expected habitId %q, got %q", "h1", log.HabitId)
+		}
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		_, err := service.FindHabitLogById("user-1", "does-not-exist")
+		if err == nil {
+			t.Fatal("expected error for non-existent log, got nil")
+		}
+	})
+}
+
+func TestServiceDeleteHabitLog(t *testing.T) {
+	storage := setupTestDB(t)
+	service := NewHabitService(storage)
+
+	created, _ := service.CreateHabitLog("user-1", HabitLogReq{HabitId: "h1", Date: "2026-02-08"})
+
+	err := service.DeleteHabitLog("user-1", created.ID)
+	if err != nil {
+		t.Fatalf("DeleteLog failed: %v", err)
+	}
+
+	_, err = service.FindHabitLogById("user-1", created.ID)
+	if err == nil {
+		t.Fatal("expected error after delete, got nil")
+	}
+}
+
+func TestServiceUpdateHabitLog(t *testing.T) {
+	storage := setupTestDB(t)
+	service := NewHabitService(storage)
+
+	created, _ := service.CreateHabitLog("user-1", HabitLogReq{
+		HabitId: "habit-1",
+		Date:    "2026-02-08",
+		Note:    "Morning run",
+	})
+
+	updated, err := service.UpdateHabitLog("user-1", created.ID, HabitLogReq{
+		HabitId: "habit-2",
+		Date:    "2026-02-09",
+		Note:    "Evening yoga",
+	})
+	if err != nil {
+		t.Fatalf("UpdateLog failed: %v", err)
+	}
+
+	if updated.HabitId != "habit-2" {
+		t.Errorf("expected habitId %q, got %q", "habit-2", updated.HabitId)
+	}
+	if updated.Date != "2026-02-09" {
+		t.Errorf("expected date %q, got %q", "2026-02-09", updated.Date)
+	}
+	if updated.Note != "Evening yoga" {
+		t.Errorf("expected note %q, got %q", "Evening yoga", updated.Note)
+	}
+	if updated.ID != created.ID {
+		t.Errorf("expected ID to be preserved (%q), got %q", created.ID, updated.ID)
 	}
 }
