@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedProfileRouteImport } from './routes/_protected/profile'
+import { Route as ProtectedHabitsRouteImport } from './routes/_protected/habits'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 
 const SsoCallbackRoute = SsoCallbackRouteImport.update({
@@ -46,6 +47,11 @@ const ProtectedProfileRoute = ProtectedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedHabitsRoute = ProtectedHabitsRouteImport.update({
+  id: '/habits',
+  path: '/habits',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/dashboard': typeof ProtectedDashboardRoute
+  '/habits': typeof ProtectedHabitsRoute
   '/profile': typeof ProtectedProfileRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/dashboard': typeof ProtectedDashboardRoute
+  '/habits': typeof ProtectedHabitsRoute
   '/profile': typeof ProtectedProfileRoute
 }
 export interface FileRoutesById {
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/_protected/dashboard': typeof ProtectedDashboardRoute
+  '/_protected/habits': typeof ProtectedHabitsRoute
   '/_protected/profile': typeof ProtectedProfileRoute
 }
 export interface FileRouteTypes {
@@ -86,9 +95,17 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sso-callback'
     | '/dashboard'
+    | '/habits'
     | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signup' | '/sso-callback' | '/dashboard' | '/profile'
+  to:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/sso-callback'
+    | '/dashboard'
+    | '/habits'
+    | '/profile'
   id:
     | '__root__'
     | '/'
@@ -97,6 +114,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sso-callback'
     | '/_protected/dashboard'
+    | '/_protected/habits'
     | '/_protected/profile'
   fileRoutesById: FileRoutesById
 }
@@ -152,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedProfileRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/habits': {
+      id: '/_protected/habits'
+      path: '/habits'
+      fullPath: '/habits'
+      preLoaderRoute: typeof ProtectedHabitsRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/dashboard': {
       id: '/_protected/dashboard'
       path: '/dashboard'
@@ -164,11 +189,13 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteChildren {
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
+  ProtectedHabitsRoute: typeof ProtectedHabitsRoute
   ProtectedProfileRoute: typeof ProtectedProfileRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedDashboardRoute: ProtectedDashboardRoute,
+  ProtectedHabitsRoute: ProtectedHabitsRoute,
   ProtectedProfileRoute: ProtectedProfileRoute,
 }
 
