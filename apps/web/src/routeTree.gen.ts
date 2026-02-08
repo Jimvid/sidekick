@@ -17,10 +17,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedProfileRouteImport } from './routes/_protected/profile'
 import { Route as ProtectedHabitsRouteImport } from './routes/_protected/habits'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
-import { Route as ProtectedHabitsIndexRouteImport } from './routes/_protected/habits.index'
-import { Route as ProtectedHabitsManageRouteImport } from './routes/_protected/habits.manage'
-import { Route as ProtectedHabitsCreateRouteImport } from './routes/_protected/habits.create'
-import { Route as ProtectedHabitsHabitIdEditRouteImport } from './routes/_protected/habits.$habitId.edit'
+import { Route as ProtectedHabitsIndexRouteImport } from './routes/_protected/habits/index'
+import { Route as ProtectedHabitsManageRouteImport } from './routes/_protected/habits/manage'
+import { Route as ProtectedHabitsCreateRouteImport } from './routes/_protected/habits/create'
+import { Route as ProtectedHabitsHabitIdEditRouteImport } from './routes/_protected/habits/$habitId.edit'
 
 const SsoCallbackRoute = SsoCallbackRouteImport.update({
   id: '/sso-callback',
