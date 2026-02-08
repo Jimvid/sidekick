@@ -3,7 +3,9 @@ import {
   CaretLeftIcon,
   CaretRightIcon,
   PencilIcon,
+  PencilSimpleIcon,
   PlusIcon,
+  TrashIcon,
 } from '@phosphor-icons/react'
 import { useNavigate } from '@tanstack/react-router'
 import type { Habit, HabitLog, QuarterInfo } from '@/types/habits'
@@ -87,8 +89,20 @@ export const HabitTracker = () => {
   const [currentQuarter, setCurrentQuarter] = useState(() =>
     getQuarter(2024, 1),
   )
+  const [logHabitId, setLogHabitId] = useState('')
+  const [logNote, setLogNote] = useState('')
+  const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10))
 
   const entries = buildCalendarEntries(HABIT_LOGS, HABITS)
+  const habitMap = new Map(HABITS.map((h) => [h.id, h]))
+  const sortedLogs = [...HABIT_LOGS].sort((a, b) =>
+    b.date.localeCompare(a.date),
+  )
+  const latestDate = sortedLogs[0]?.date ?? ''
+  const weekAgo = new Date(latestDate + 'T00:00:00')
+  weekAgo.setDate(weekAgo.getDate() - 7)
+  const weekAgoStr = weekAgo.toISOString().slice(0, 10)
+  const recentLogs = sortedLogs.filter((log) => log.date >= weekAgoStr)
 
   const navigateQuarter = (direction: -1 | 1) => {
     setCurrentQuarter((prev) => {
@@ -178,11 +192,135 @@ export const HabitTracker = () => {
             </span>
           </div>
         </div>
+        {/* Log Entry Form */}
+        {/* Log Entry Form */}
+        <div className="flex flex-col gap-3 rounded-lg border border-base-content/10 bg-base-100/50 p-4 sm:flex-row sm:items-end">
+          <div className="form-control flex-1">
+            <label className="label">
+              <span className="label-text">Habit</span>
+            </label>
+            <select
+              className="select select-bordered w-full"
+              value={logHabitId}
+              onChange={(e) => setLogHabitId(e.target.value)}
+            >
+              <option value="">Select a habit...</option>
+              {HABITS.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-control flex-1">
+            <label className="label">
+              <span className="label-text">Note (optional)</span>
+            </label>
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              placeholder="e.g. 30 min run"
+              value={logNote}
+              onChange={(e) => setLogNote(e.target.value)}
+            />
+          </div>
+          <span className="input input-bordered flex w-auto min-w-36 shrink-0 items-center">
+            {new Date(logDate + 'T00:00:00').toLocaleDateString(undefined, {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </span>
+          <button
+            className="btn btn-primary shrink-0"
+            disabled={logHabitId === ''}
+            onClick={() => {
+              const habit = habitMap.get(logHabitId)
+              alert(
+                JSON.stringify(
+                  { habitId: logHabitId, habit: habit?.name, note: logNote || undefined, date: logDate },
+                  null,
+                  2,
+                ),
+              )
+              setLogHabitId('')
+              setLogNote('')
+            }}
+          >
+            <PlusIcon size={20} />
+            Log
+          </button>
+        </div>
+
         <Calendar
           year={currentQuarter.year}
           months={currentQuarter.months}
           entries={entries}
+          selectedDate={logDate}
+          onDateSelect={setLogDate}
         />
+
+        {/* Recent Log Entries */}
+        <div>
+          <h2 className="mb-3 text-lg font-semibold text-base-content">
+            Last 7 Days
+          </h2>
+          <div className="flex flex-col gap-4">
+            {recentLogs.map((log) => (
+              <div key={log.date}>
+                <p className="mb-2 text-sm font-medium text-base-content/50">
+                  {new Date(log.date + 'T00:00:00').toLocaleDateString(
+                    undefined,
+                    { weekday: 'long', month: 'short', day: 'numeric' },
+                  )}
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {log.entries.map((entry, i) => {
+                    const habit = habitMap.get(entry.habitId)
+                    if (!habit) return null
+                    return (
+                      <div
+                        key={`${entry.habitId}-${i}`}
+                        className="flex items-center gap-3 rounded-lg border border-base-content/10 bg-base-100/50 px-4 py-3"
+                      >
+                        <span
+                          className="h-3 w-3 shrink-0 rounded-full"
+                          style={{ backgroundColor: habit.color }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <span className="text-sm font-medium text-base-content">
+                            {habit.name}
+                          </span>
+                          {entry.note && (
+                            <p className="truncate text-sm text-base-content/40">
+                              {entry.note}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          className="btn btn-ghost btn-sm btn-circle shrink-0"
+                          onClick={() =>
+                            alert(
+                              `Edit: ${habit.name} on ${log.date}${entry.note ? `\nNote: ${entry.note}` : ''}`,
+                            )
+                          }
+                        >
+                          <PencilSimpleIcon size={16} />
+                        </button>
+                        <button
+                          className="btn btn-ghost btn-sm btn-circle shrink-0 text-error"
+                          onClick={() => alert('delete')}
+                        >
+                          <TrashIcon size={16} />
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

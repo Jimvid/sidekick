@@ -26,6 +26,8 @@ interface CalendarProps {
   year: number
   months: Array<number>
   entries: Record<string, CalendarEntry>
+  selectedDate?: string
+  onDateSelect?: (date: string) => void
 }
 
 function getMonthGrid(year: number, month: number) {
@@ -61,11 +63,15 @@ function MonthGrid({
   month,
   entries,
   hideTitle,
+  selectedDate,
+  onDateSelect,
 }: {
   year: number
   month: number
   entries: Record<string, CalendarEntry>
   hideTitle?: boolean
+  selectedDate?: string
+  onDateSelect?: (date: string) => void
 }) {
   const weeks = getMonthGrid(year, month)
 
@@ -93,14 +99,17 @@ function MonthGrid({
           const dateKey = formatDateKey(year, month, day)
           const entry = entries[dateKey] as CalendarEntry | undefined
           const hasEntries = entry != null && entry.colors.length > 0
+          const isSelected = dateKey === selectedDate
 
           return (
             <div
               key={dateKey}
-              onClick={() => alert(`${MONTH_NAMES[month]} ${day}, ${year}`)}
-              className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-0.5 rounded border border-base-content/10 transition-all hover:scale-110 hover:bg-base-200/60 ${
-                hasEntries ? 'bg-base-200' : 'bg-base-100/50'
-              }`}
+              onClick={() => onDateSelect?.(dateKey)}
+              className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-0.5 rounded border transition-all hover:scale-110 hover:bg-base-200/60 ${
+                isSelected
+                  ? 'border-primary ring-1 ring-primary'
+                  : 'border-base-content/10'
+              } ${hasEntries ? 'bg-base-200' : 'bg-base-100/50'}`}
             >
               <span className="text-xs text-base-content/70">{day}</span>
               {hasEntries && (
@@ -122,7 +131,7 @@ function MonthGrid({
   )
 }
 
-export const Calendar = ({ year, months, entries }: CalendarProps) => {
+export const Calendar = ({ year, months, entries, selectedDate, onDateSelect }: CalendarProps) => {
   const [mobileIndex, setMobileIndex] = useState(0)
 
   useEffect(() => {
@@ -157,6 +166,8 @@ export const Calendar = ({ year, months, entries }: CalendarProps) => {
           month={months[mobileIndex]}
           entries={entries}
           hideTitle
+          selectedDate={selectedDate}
+          onDateSelect={onDateSelect}
         />
       </div>
 
@@ -168,6 +179,8 @@ export const Calendar = ({ year, months, entries }: CalendarProps) => {
             year={year}
             month={month}
             entries={entries}
+            selectedDate={selectedDate}
+            onDateSelect={onDateSelect}
           />
         ))}
       </div>
