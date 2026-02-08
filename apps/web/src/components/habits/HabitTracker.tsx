@@ -10,16 +10,7 @@ import {
 import { useNavigate } from '@tanstack/react-router'
 import type { Habit, HabitLog, QuarterInfo } from '@/types/habits'
 import { Calendar } from '@/components/Calendar'
-
-const HABITS: Array<Habit> = [
-  { id: 'reading', name: 'Reading', description: 'Read for at least 30 minutes', color: '#22c55e', count: 24 },
-  { id: 'exercise', name: 'Exercise', description: 'Any physical activity', color: '#3b82f6', count: 18 },
-  { id: 'meditation', name: 'Meditation', description: 'Mindfulness practice', color: '#a855f7', count: 15 },
-  { id: 'water', name: 'Water Intake', description: 'Drink 8 glasses of water', color: '#14b8a6', count: 31 },
-  { id: 'junkfood', name: 'Junk Food', description: 'Track junk food consumption', color: '#ef4444', count: 12 },
-  { id: 'snacking', name: 'Snacking', description: 'Track snacking between meals', color: '#f97316', count: 8 },
-  { id: 'latesleep', name: 'Late Sleep', description: 'Went to bed after midnight', color: '#eab308', count: 5 },
-]
+import { useHabits } from '@/hooks/api/habits'
 
 const HABIT_LOGS: Array<HabitLog> = [
   { date: '2024-01-02', entries: [{ habitId: 'reading' }, { habitId: 'exercise' }] },
@@ -86,6 +77,7 @@ function buildCalendarEntries(logs: Array<HabitLog>, habits: Array<Habit>) {
 
 export const HabitTracker = () => {
   const navigate = useNavigate()
+  const { data: habits = [], isLoading } = useHabits()
   const [currentQuarter, setCurrentQuarter] = useState(() =>
     getQuarter(2024, 1),
   )
@@ -93,8 +85,8 @@ export const HabitTracker = () => {
   const [logNote, setLogNote] = useState('')
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10))
 
-  const entries = buildCalendarEntries(HABIT_LOGS, HABITS)
-  const habitMap = new Map(HABITS.map((h) => [h.id, h]))
+  const entries = buildCalendarEntries(HABIT_LOGS, habits)
+  const habitMap = new Map(habits.map((h) => [h.id, h]))
   const sortedLogs = [...HABIT_LOGS].sort((a, b) =>
     b.date.localeCompare(a.date),
   )
@@ -123,6 +115,14 @@ export const HabitTracker = () => {
     const now = new Date()
     const quarter = Math.ceil((now.getMonth() + 1) / 3)
     setCurrentQuarter(getQuarter(now.getFullYear(), quarter))
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[calc(100vh-88px)] items-center justify-center">
+        <span className="loading loading-spinner loading-lg" />
+      </div>
+    )
   }
 
   return (
@@ -205,7 +205,7 @@ export const HabitTracker = () => {
               onChange={(e) => setLogHabitId(e.target.value)}
             >
               <option value="">Select a habit...</option>
-              {HABITS.map((h) => (
+              {habits.map((h) => (
                 <option key={h.id} value={h.id}>
                   {h.name}
                 </option>

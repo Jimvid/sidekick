@@ -1,3 +1,3 @@
 export const config = {
-  apiUrl: 'https://dev.api.sidekick.jimvid.xyz',
+  apiUrl: import.meta.env.VITE_API_URL ?? 'https://dev.api.sidekick.jimvid.xyz',
 }

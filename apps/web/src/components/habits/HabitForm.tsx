@@ -2,6 +2,7 @@ import { useForm } from '@tanstack/react-form'
 import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon } from '@phosphor-icons/react'
 import type { Habit } from '@/types/habits'
+import { useCreateHabit, useUpdateHabit } from '@/hooks/api/habits'
 
 const COLOR_OPTIONS = [
   { label: 'Green', value: '#22c55e' },
@@ -21,6 +22,9 @@ interface HabitFormProps {
 export const HabitForm = ({ habit }: HabitFormProps) => {
   const navigate = useNavigate()
   const isEditing = habit != null
+  const createHabit = useCreateHabit()
+  const updateHabit = useUpdateHabit()
+  const isPending = createHabit.isPending || updateHabit.isPending
 
   const form = useForm({
     defaultValues: {
@@ -29,14 +33,22 @@ export const HabitForm = ({ habit }: HabitFormProps) => {
       color: habit?.color ?? '#22c55e',
     },
     onSubmit: ({ value }) => {
-      const payload = {
-        id: habit?.id ?? value.name.toLowerCase().replace(/\s+/g, '-'),
+      const data = {
         name: value.name,
         description: value.description,
         color: value.color,
-        count: habit?.count ?? 0,
       }
-      alert(JSON.stringify(payload, null, 2))
+
+      if (isEditing) {
+        updateHabit.mutate(
+          { id: habit.id, data },
+          { onSuccess: () => navigate({ to: '/habits' }) },
+        )
+      } else {
+        createHabit.mutate(data, {
+          onSuccess: () => navigate({ to: '/habits' }),
+        })
+      }
     },
   })
 
@@ -173,9 +185,11 @@ export const HabitForm = ({ habit }: HabitFormProps) => {
                 <button
                   type="submit"
                   className="btn btn-primary flex-1"
-                  disabled={!canSubmit}
+                  disabled={!canSubmit || isPending}
                 >
-                  {isEditing ? 'Save Changes' : 'Create Habit'}
+                  {isPending
+                    ? <span className="loading loading-spinner loading-sm" />
+                    : isEditing ? 'Save Changes' : 'Create Habit'}
                 </button>
               )}
             </form.Subscribe>

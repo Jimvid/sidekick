@@ -3,7 +3,14 @@ export interface Habit {
   name: string
   description: string
   color: string
-  count: number
+  createdAt: number
+  updatedAt: number
+}
+
+export interface HabitReq {
+  name: string
+  description: string
+  color: string
 }
 
 export interface HabitLogEntry {
