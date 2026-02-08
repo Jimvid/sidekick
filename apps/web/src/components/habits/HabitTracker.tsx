@@ -125,7 +125,10 @@ export const HabitTracker = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <button className="btn btn-primary">
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate({ to: '/habits/manage' })}
+            >
               <PencilIcon size={20} />
               Edit habits
             </button>
