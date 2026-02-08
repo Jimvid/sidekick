@@ -10,9 +10,9 @@ export const Route = createFileRoute('/_protected')({
     }
   },
   component: () => (
-    <div className="min-h-screen pb-20">
+    <main className="min-h-screen pb-20">
       <Outlet />
       <MenuBar />
-    </div>
+    </main>
   ),
 })
