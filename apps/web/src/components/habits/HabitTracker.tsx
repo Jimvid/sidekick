@@ -4,13 +4,13 @@ import {
   CaretRightIcon,
   PencilIcon,
   PlusIcon,
-  TrashIcon,
 } from '@phosphor-icons/react'
 import { useNavigate } from '@tanstack/react-router'
 import type { Habit, HabitLog, QuarterInfo } from '@/types/habits'
 import { Calendar } from '@/components/Calendar'
+import { HabitLogList } from '@/components/habits/HabitLogList'
 import { useHabits } from '@/hooks/api/habits'
-import { useCreateHabitLog, useDeleteHabitLog, useHabitLogs } from '@/hooks/api/habitLogs'
+import { useCreateHabitLog, useHabitLogs } from '@/hooks/api/habitLogs'
 
 function getQuarter(year: number, quarter: number): QuarterInfo {
   const months = [
@@ -26,22 +26,22 @@ function getQuarter(year: number, quarter: number): QuarterInfo {
   }
 }
 
-function groupLogsByDate(logs: Array<HabitLog>) {
+function groupHabitLogsByDate(habitLogs: Array<HabitLog>) {
   const grouped = new Map<string, Array<HabitLog>>()
-  for (const log of logs) {
-    const existing = grouped.get(log.date)
+  for (const habitLog of habitLogs) {
+    const existing = grouped.get(habitLog.date)
     if (existing) {
-      existing.push(log)
+      existing.push(habitLog)
     } else {
-      grouped.set(log.date, [log])
+      grouped.set(habitLog.date, [habitLog])
     }
   }
   return grouped
 }
 
-function buildCalendarEntries(logs: Array<HabitLog>, habits: Array<Habit>) {
+function buildCalendarEntries(habitLogs: Array<HabitLog>, habits: Array<Habit>) {
   const habitMap = new Map(habits.map((h) => [h.id, h]))
-  const grouped = groupLogsByDate(logs)
+  const grouped = groupHabitLogsByDate(habitLogs)
   const calendarEntries: Record<string, { colors: Array<string> }> = {}
 
   for (const [date, dateLogs] of grouped) {
@@ -59,8 +59,7 @@ export const HabitTracker = () => {
   const navigate = useNavigate()
   const { data: habits = [], isLoading: habitsLoading } = useHabits()
   const { data: habitLogs = [], isLoading: logsLoading } = useHabitLogs()
-  const createLog = useCreateHabitLog()
-  const deleteLog = useDeleteHabitLog()
+  const createHabitLog = useCreateHabitLog()
 
   const [currentQuarter, setCurrentQuarter] = useState(() => {
     const now = new Date()
@@ -71,24 +70,7 @@ export const HabitTracker = () => {
   const [logNote, setLogNote] = useState('')
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10))
 
-  const habitMap = useMemo(() => new Map(habits.map((h) => [h.id, h])), [habits])
   const entries = useMemo(() => buildCalendarEntries(habitLogs, habits), [habitLogs, habits])
-
-  const recentLogs = useMemo(() => {
-    const sorted = [...habitLogs].sort((a, b) => b.date.localeCompare(a.date))
-    const latestDate = sorted[0]?.date ?? ''
-    if (!latestDate) return new Map<string, Array<HabitLog>>()
-    const weekAgo = new Date(latestDate + 'T00:00:00')
-    weekAgo.setDate(weekAgo.getDate() - 7)
-    const weekAgoStr = weekAgo.toISOString().slice(0, 10)
-    const recent = sorted.filter((log) => log.date >= weekAgoStr)
-    return groupLogsByDate(recent)
-  }, [habitLogs])
-
-  const sortedRecentDates = useMemo(
-    () => [...recentLogs.keys()].sort((a, b) => b.localeCompare(a)),
-    [recentLogs],
-  )
 
   const navigateQuarter = (direction: -1 | 1) => {
     setCurrentQuarter((prev) => {
@@ -112,7 +94,7 @@ export const HabitTracker = () => {
   }
 
   const handleLogSubmit = () => {
-    createLog.mutate(
+    createHabitLog.mutate(
       { habitId: logHabitId, date: logDate, note: logNote },
       {
         onSuccess: () => {
@@ -236,10 +218,10 @@ export const HabitTracker = () => {
           </span>
           <button
             className="btn btn-primary shrink-0"
-            disabled={logHabitId === '' || createLog.isPending}
+            disabled={logHabitId === '' || createHabitLog.isPending}
             onClick={handleLogSubmit}
           >
-            {createLog.isPending ? (
+            {createHabitLog.isPending ? (
               <span className="loading loading-spinner loading-sm" />
             ) : (
               <PlusIcon size={20} />
@@ -260,7 +242,7 @@ export const HabitTracker = () => {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-base-content">
-              Last 7 Days
+              Recent Logs
             </h2>
             <button
               className="btn btn-ghost btn-sm"
@@ -269,59 +251,7 @@ export const HabitTracker = () => {
               View all logs
             </button>
           </div>
-          <div className="flex flex-col gap-4">
-            {sortedRecentDates.map((date) => {
-              const dateLogs = recentLogs.get(date) ?? []
-              return (
-                <div key={date}>
-                  <p className="mb-2 text-sm font-medium text-base-content/50">
-                    {new Date(date + 'T00:00:00').toLocaleDateString(
-                      undefined,
-                      { weekday: 'long', month: 'short', day: 'numeric' },
-                    )}
-                  </p>
-                  <div className="flex flex-col gap-1.5">
-                    {dateLogs.map((log) => {
-                      const habit = habitMap.get(log.habitId)
-                      if (!habit) return null
-                      return (
-                        <div
-                          key={log.id}
-                          className="flex items-center gap-3 rounded-lg border border-base-content/10 bg-base-100/50 px-4 py-3"
-                        >
-                          <span
-                            className="h-3 w-3 shrink-0 rounded-full"
-                            style={{ backgroundColor: habit.color }}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <span className="text-sm font-medium text-base-content">
-                              {habit.name}
-                            </span>
-                            {log.note && (
-                              <p className="truncate text-sm text-base-content/40">
-                                {log.note}
-                              </p>
-                            )}
-                          </div>
-                          <button
-                            className="btn btn-ghost btn-sm btn-circle shrink-0 text-error"
-                            disabled={deleteLog.isPending}
-                            onClick={() => {
-                              if (window.confirm(`Delete this ${habit.name} log?`)) {
-                                deleteLog.mutate(log.id)
-                              }
-                            }}
-                          >
-                            <TrashIcon size={16} />
-                          </button>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <HabitLogList limit={10} showFilters={false} />
         </div>
       </div>
     </div>

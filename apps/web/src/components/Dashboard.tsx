@@ -1,12 +1,13 @@
 import { useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
-  PlusIcon,
-  PencilIcon,
   ListIcon,
+  PencilIcon,
+  PlusIcon,
 } from '@phosphor-icons/react'
 import { useHabits } from '@/hooks/api/habits'
 import { useHabitLogs } from '@/hooks/api/habitLogs'
+import { LogListItem } from '@/components/habits/LogListItem'
 
 function getRelativeDate(dateStr: string): string {
   const today = new Date()
@@ -32,24 +33,24 @@ function getRelativeDate(dateStr: string): string {
 export function Dashboard() {
   const navigate = useNavigate()
   const { data: habits, isLoading: habitsLoading } = useHabits()
-  const { data: logs, isLoading: logsLoading } = useHabitLogs()
+  const { data: habitLogs, isLoading: logsLoading } = useHabitLogs()
 
   const isLoading = habitsLoading || logsLoading
 
-  const recentLogs = useMemo(() => {
-    if (!logs || !habits) return []
+  const recentHabitLogs = useMemo(() => {
+    if (!habitLogs || !habits) return []
     const habitMap = new Map(habits.map((h) => [h.id, h]))
-    return [...logs]
+    return [...habitLogs]
       .sort((a, b) => {
         if (a.date !== b.date) return b.date.localeCompare(a.date)
         return b.createdAt - a.createdAt
       })
       .slice(0, 5)
-      .map((log) => ({
-        ...log,
-        habit: habitMap.get(log.habitId),
+      .map((habitLog) => ({
+        ...habitLog,
+        habit: habitMap.get(habitLog.habitId),
       }))
-  }, [logs, habits])
+  }, [habitLogs, habits])
 
   if (isLoading) {
     return (
@@ -59,7 +60,7 @@ export function Dashboard() {
     )
   }
 
-  const hasLogs = logs && logs.length > 0
+  const hasLogs = habitLogs && habitLogs.length > 0
 
   return (
     <div className="min-h-[calc(100vh-88px)] flex flex-col p-6">
@@ -129,29 +130,13 @@ export function Dashboard() {
         </h2>
         {hasLogs ? (
           <div className="space-y-2">
-            {recentLogs.map((log) => (
-              <div
-                key={log.id}
-                className="flex items-center gap-3 rounded-lg border border-base-content/10 px-4 py-3"
-              >
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{
-                    backgroundColor: log.habit?.color ?? '#888',
-                  }}
-                />
-                <span className="text-sm font-medium text-base-content">
-                  {log.habit?.name ?? 'Unknown'}
-                </span>
-                {log.note && (
-                  <span className="truncate text-sm text-base-content/50">
-                    {log.note}
-                  </span>
-                )}
-                <span className="ml-auto shrink-0 text-xs text-base-content/40">
-                  {getRelativeDate(log.date)}
-                </span>
-              </div>
+            {recentHabitLogs.map((habitLog) => (
+              <LogListItem
+                key={habitLog.id}
+                habitLog={habitLog}
+                habit={habitLog.habit}
+                date={getRelativeDate(habitLog.date)}
+              />
             ))}
           </div>
         ) : (
