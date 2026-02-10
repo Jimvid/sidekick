@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   CaretLeftIcon,
   CaretRightIcon,
   PencilIcon,
-  PencilSimpleIcon,
   PlusIcon,
   TrashIcon,
 } from '@phosphor-icons/react'
@@ -11,40 +10,7 @@ import { useNavigate } from '@tanstack/react-router'
 import type { Habit, HabitLog, QuarterInfo } from '@/types/habits'
 import { Calendar } from '@/components/Calendar'
 import { useHabits } from '@/hooks/api/habits'
-
-const HABIT_LOGS: Array<HabitLog> = [
-  { date: '2024-01-02', entries: [{ habitId: 'reading' }, { habitId: 'exercise' }] },
-  { date: '2024-01-05', entries: [{ habitId: 'reading' }, { habitId: 'meditation' }, { habitId: 'water' }] },
-  { date: '2024-01-08', entries: [{ habitId: 'exercise' }, { habitId: 'water' }, { habitId: 'junkfood', note: 'Pizza for lunch' }] },
-  { date: '2024-01-12', entries: [{ habitId: 'reading' }, { habitId: 'meditation' }] },
-  { date: '2024-01-15', entries: [{ habitId: 'water' }, { habitId: 'exercise' }, { habitId: 'reading' }] },
-  { date: '2024-01-18', entries: [{ habitId: 'meditation' }, { habitId: 'water' }, { habitId: 'snacking', note: 'Chips at 3pm' }] },
-  { date: '2024-01-22', entries: [{ habitId: 'reading' }, { habitId: 'junkfood', note: 'Burger and fries' }] },
-  { date: '2024-01-25', entries: [{ habitId: 'exercise' }, { habitId: 'water' }, { habitId: 'reading' }] },
-  { date: '2024-01-29', entries: [{ habitId: 'reading' }, { habitId: 'meditation' }, { habitId: 'water' }] },
-  { date: '2024-01-30', entries: [{ habitId: 'water' }, { habitId: 'exercise' }] },
-  { date: '2024-02-01', entries: [{ habitId: 'reading' }, { habitId: 'water' }, { habitId: 'meditation' }] },
-  { date: '2024-02-06', entries: [{ habitId: 'exercise' }, { habitId: 'reading' }, { habitId: 'water' }] },
-  { date: '2024-02-08', entries: [{ habitId: 'meditation' }, { habitId: 'water' }] },
-  { date: '2024-02-12', entries: [{ habitId: 'reading' }, { habitId: 'exercise' }, { habitId: 'snacking', note: 'Cookies' }] },
-  { date: '2024-02-13', entries: [{ habitId: 'water' }, { habitId: 'meditation' }, { habitId: 'reading' }] },
-  { date: '2024-02-19', entries: [{ habitId: 'reading' }, { habitId: 'water' }, { habitId: 'junkfood', note: 'Fried chicken' }] },
-  { date: '2024-02-20', entries: [{ habitId: 'exercise' }, { habitId: 'meditation' }, { habitId: 'water' }] },
-  { date: '2024-02-22', entries: [{ habitId: 'reading' }, { habitId: 'latesleep', note: '2am coding' }] },
-  { date: '2024-02-26', entries: [{ habitId: 'water' }, { habitId: 'reading' }] },
-  { date: '2024-02-27', entries: [{ habitId: 'meditation' }, { habitId: 'exercise' }] },
-  { date: '2024-03-01', entries: [{ habitId: 'reading' }, { habitId: 'water' }] },
-  { date: '2024-03-04', entries: [{ habitId: 'exercise' }, { habitId: 'reading' }, { habitId: 'meditation' }] },
-  { date: '2024-03-07', entries: [{ habitId: 'water' }, { habitId: 'reading' }, { habitId: 'latesleep', note: 'Netflix binge' }] },
-  { date: '2024-03-11', entries: [{ habitId: 'reading' }, { habitId: 'exercise' }, { habitId: 'water' }] },
-  { date: '2024-03-14', entries: [{ habitId: 'meditation' }, { habitId: 'water' }, { habitId: 'reading' }] },
-  { date: '2024-03-18', entries: [{ habitId: 'water' }, { habitId: 'exercise' }, { habitId: 'junkfood', note: 'Donuts at work' }] },
-  { date: '2024-03-19', entries: [{ habitId: 'reading' }, { habitId: 'meditation' }] },
-  { date: '2024-03-21', entries: [{ habitId: 'water' }, { habitId: 'reading' }, { habitId: 'snacking', note: 'Late night popcorn' }] },
-  { date: '2024-03-25', entries: [{ habitId: 'exercise' }, { habitId: 'water' }, { habitId: 'latesleep' }] },
-  { date: '2024-03-28', entries: [{ habitId: 'reading' }, { habitId: 'meditation' }, { habitId: 'water' }] },
-  { date: '2024-03-29', entries: [{ habitId: 'reading' }, { habitId: 'water' }] },
-]
+import { useCreateHabitLog, useDeleteHabitLog, useHabitLogs } from '@/hooks/api/habitLogs'
 
 function getQuarter(year: number, quarter: number): QuarterInfo {
   const months = [
@@ -60,14 +26,28 @@ function getQuarter(year: number, quarter: number): QuarterInfo {
   }
 }
 
+function groupLogsByDate(logs: Array<HabitLog>) {
+  const grouped = new Map<string, Array<HabitLog>>()
+  for (const log of logs) {
+    const existing = grouped.get(log.date)
+    if (existing) {
+      existing.push(log)
+    } else {
+      grouped.set(log.date, [log])
+    }
+  }
+  return grouped
+}
+
 function buildCalendarEntries(logs: Array<HabitLog>, habits: Array<Habit>) {
   const habitMap = new Map(habits.map((h) => [h.id, h]))
+  const grouped = groupLogsByDate(logs)
   const calendarEntries: Record<string, { colors: Array<string> }> = {}
 
-  for (const log of logs) {
-    calendarEntries[log.date] = {
-      colors: log.entries
-        .map((e) => habitMap.get(e.habitId)?.color)
+  for (const [date, dateLogs] of grouped) {
+    calendarEntries[date] = {
+      colors: dateLogs
+        .map((l) => habitMap.get(l.habitId)?.color)
         .filter((c): c is string => c !== undefined),
     }
   }
@@ -77,24 +57,38 @@ function buildCalendarEntries(logs: Array<HabitLog>, habits: Array<Habit>) {
 
 export const HabitTracker = () => {
   const navigate = useNavigate()
-  const { data: habits = [], isLoading } = useHabits()
-  const [currentQuarter, setCurrentQuarter] = useState(() =>
-    getQuarter(2024, 1),
-  )
+  const { data: habits = [], isLoading: habitsLoading } = useHabits()
+  const { data: habitLogs = [], isLoading: logsLoading } = useHabitLogs()
+  const createLog = useCreateHabitLog()
+  const deleteLog = useDeleteHabitLog()
+
+  const [currentQuarter, setCurrentQuarter] = useState(() => {
+    const now = new Date()
+    const quarter = Math.ceil((now.getMonth() + 1) / 3)
+    return getQuarter(now.getFullYear(), quarter)
+  })
   const [logHabitId, setLogHabitId] = useState('')
   const [logNote, setLogNote] = useState('')
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10))
 
-  const entries = buildCalendarEntries(HABIT_LOGS, habits)
-  const habitMap = new Map(habits.map((h) => [h.id, h]))
-  const sortedLogs = [...HABIT_LOGS].sort((a, b) =>
-    b.date.localeCompare(a.date),
+  const habitMap = useMemo(() => new Map(habits.map((h) => [h.id, h])), [habits])
+  const entries = useMemo(() => buildCalendarEntries(habitLogs, habits), [habitLogs, habits])
+
+  const recentLogs = useMemo(() => {
+    const sorted = [...habitLogs].sort((a, b) => b.date.localeCompare(a.date))
+    const latestDate = sorted[0]?.date ?? ''
+    if (!latestDate) return new Map<string, Array<HabitLog>>()
+    const weekAgo = new Date(latestDate + 'T00:00:00')
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    const weekAgoStr = weekAgo.toISOString().slice(0, 10)
+    const recent = sorted.filter((log) => log.date >= weekAgoStr)
+    return groupLogsByDate(recent)
+  }, [habitLogs])
+
+  const sortedRecentDates = useMemo(
+    () => [...recentLogs.keys()].sort((a, b) => b.localeCompare(a)),
+    [recentLogs],
   )
-  const latestDate = sortedLogs[0]?.date ?? ''
-  const weekAgo = new Date(latestDate + 'T00:00:00')
-  weekAgo.setDate(weekAgo.getDate() - 7)
-  const weekAgoStr = weekAgo.toISOString().slice(0, 10)
-  const recentLogs = sortedLogs.filter((log) => log.date >= weekAgoStr)
 
   const navigateQuarter = (direction: -1 | 1) => {
     setCurrentQuarter((prev) => {
@@ -116,6 +110,20 @@ export const HabitTracker = () => {
     const quarter = Math.ceil((now.getMonth() + 1) / 3)
     setCurrentQuarter(getQuarter(now.getFullYear(), quarter))
   }
+
+  const handleLogSubmit = () => {
+    createLog.mutate(
+      { habitId: logHabitId, date: logDate, note: logNote },
+      {
+        onSuccess: () => {
+          setLogHabitId('')
+          setLogNote('')
+        },
+      },
+    )
+  }
+
+  const isLoading = habitsLoading || logsLoading
 
   if (isLoading) {
     return (
@@ -183,16 +191,11 @@ export const HabitTracker = () => {
           </div>
           <div className="flex items-center gap-4 text-sm text-base-content/60">
             <span>
-              Current Streak:{' '}
-              <strong className="text-base-content">7 days</strong>
-            </span>
-            <span>
               Total Logged:{' '}
-              <strong className="text-base-content">113 habits</strong>
+              <strong className="text-base-content">{habitLogs.length}</strong>
             </span>
           </div>
         </div>
-        {/* Log Entry Form */}
         {/* Log Entry Form */}
         <div className="flex flex-col gap-3 rounded-lg border border-base-content/10 bg-base-100/50 p-4 sm:flex-row sm:items-end">
           <div className="form-control flex-1">
@@ -233,21 +236,14 @@ export const HabitTracker = () => {
           </span>
           <button
             className="btn btn-primary shrink-0"
-            disabled={logHabitId === ''}
-            onClick={() => {
-              const habit = habitMap.get(logHabitId)
-              alert(
-                JSON.stringify(
-                  { habitId: logHabitId, habit: habit?.name, note: logNote || undefined, date: logDate },
-                  null,
-                  2,
-                ),
-              )
-              setLogHabitId('')
-              setLogNote('')
-            }}
+            disabled={logHabitId === '' || createLog.isPending}
+            onClick={handleLogSubmit}
           >
-            <PlusIcon size={20} />
+            {createLog.isPending ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              <PlusIcon size={20} />
+            )}
             Log
           </button>
         </div>
@@ -266,59 +262,57 @@ export const HabitTracker = () => {
             Last 7 Days
           </h2>
           <div className="flex flex-col gap-4">
-            {recentLogs.map((log) => (
-              <div key={log.date}>
-                <p className="mb-2 text-sm font-medium text-base-content/50">
-                  {new Date(log.date + 'T00:00:00').toLocaleDateString(
-                    undefined,
-                    { weekday: 'long', month: 'short', day: 'numeric' },
-                  )}
-                </p>
-                <div className="flex flex-col gap-1.5">
-                  {log.entries.map((entry, i) => {
-                    const habit = habitMap.get(entry.habitId)
-                    if (!habit) return null
-                    return (
-                      <div
-                        key={`${entry.habitId}-${i}`}
-                        className="flex items-center gap-3 rounded-lg border border-base-content/10 bg-base-100/50 px-4 py-3"
-                      >
-                        <span
-                          className="h-3 w-3 shrink-0 rounded-full"
-                          style={{ backgroundColor: habit.color }}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="text-sm font-medium text-base-content">
-                            {habit.name}
-                          </span>
-                          {entry.note && (
-                            <p className="truncate text-sm text-base-content/40">
-                              {entry.note}
-                            </p>
-                          )}
+            {sortedRecentDates.map((date) => {
+              const dateLogs = recentLogs.get(date) ?? []
+              return (
+                <div key={date}>
+                  <p className="mb-2 text-sm font-medium text-base-content/50">
+                    {new Date(date + 'T00:00:00').toLocaleDateString(
+                      undefined,
+                      { weekday: 'long', month: 'short', day: 'numeric' },
+                    )}
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    {dateLogs.map((log) => {
+                      const habit = habitMap.get(log.habitId)
+                      if (!habit) return null
+                      return (
+                        <div
+                          key={log.id}
+                          className="flex items-center gap-3 rounded-lg border border-base-content/10 bg-base-100/50 px-4 py-3"
+                        >
+                          <span
+                            className="h-3 w-3 shrink-0 rounded-full"
+                            style={{ backgroundColor: habit.color }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <span className="text-sm font-medium text-base-content">
+                              {habit.name}
+                            </span>
+                            {log.note && (
+                              <p className="truncate text-sm text-base-content/40">
+                                {log.note}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            className="btn btn-ghost btn-sm btn-circle shrink-0 text-error"
+                            disabled={deleteLog.isPending}
+                            onClick={() => {
+                              if (window.confirm(`Delete this ${habit.name} log?`)) {
+                                deleteLog.mutate(log.id)
+                              }
+                            }}
+                          >
+                            <TrashIcon size={16} />
+                          </button>
                         </div>
-                        <button
-                          className="btn btn-ghost btn-sm btn-circle shrink-0"
-                          onClick={() =>
-                            alert(
-                              `Edit: ${habit.name} on ${log.date}${entry.note ? `\nNote: ${entry.note}` : ''}`,
-                            )
-                          }
-                        >
-                          <PencilSimpleIcon size={16} />
-                        </button>
-                        <button
-                          className="btn btn-ghost btn-sm btn-circle shrink-0 text-error"
-                          onClick={() => alert('delete')}
-                        >
-                          <TrashIcon size={16} />
-                        </button>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>

@@ -13,14 +13,19 @@ export interface HabitReq {
   color: string
 }
 
-export interface HabitLogEntry {
+export interface HabitLog {
+  id: string
   habitId: string
-  note?: string
+  date: string
+  note: string
+  createdAt: number
+  updatedAt: number
 }
 
-export interface HabitLog {
+export interface HabitLogReq {
+  habitId: string
   date: string
-  entries: Array<HabitLogEntry>
+  note: string
 }
 
 export interface QuarterInfo {
