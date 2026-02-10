@@ -39,7 +39,10 @@ function groupHabitLogsByDate(habitLogs: Array<HabitLog>) {
   return grouped
 }
 
-function buildCalendarEntries(habitLogs: Array<HabitLog>, habits: Array<Habit>) {
+function buildCalendarEntries(
+  habitLogs: Array<HabitLog>,
+  habits: Array<Habit>,
+) {
   const habitMap = new Map(habits.map((h) => [h.id, h]))
   const grouped = groupHabitLogsByDate(habitLogs)
   const calendarEntries: Record<string, { colors: Array<string> }> = {}
@@ -68,9 +71,14 @@ export const HabitTracker = () => {
   })
   const [logHabitId, setLogHabitId] = useState('')
   const [logNote, setLogNote] = useState('')
-  const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [logDate, setLogDate] = useState(() =>
+    new Date().toISOString().slice(0, 10),
+  )
 
-  const entries = useMemo(() => buildCalendarEntries(habitLogs, habits), [habitLogs, habits])
+  const entries = useMemo(
+    () => buildCalendarEntries(habitLogs, habits),
+    [habitLogs, habits],
+  )
 
   const navigateQuarter = (direction: -1 | 1) => {
     setCurrentQuarter((prev) => {
@@ -116,32 +124,30 @@ export const HabitTracker = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-88px)] flex flex-col p-6">
+    <div className="min-h-[calc(100vh-88px)] flex flex-col p-4 sm:p-6">
       <div className="mx-auto w-full max-w-6xl space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-base-content">
-              Habit Tracker
-            </h1>
+            <h1 className="text-2xl font-bold text-base-content">Habits</h1>
             <p className="text-sm text-base-content/60">
               Track your daily habits
             </p>
           </div>
           <div className="flex gap-2">
             <button
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm sm:btn-md"
               onClick={() => navigate({ to: '/habits/manage' })}
             >
               <PencilIcon size={20} />
-              Edit habits
+              <span className="hidden sm:inline">Edit habits</span>
             </button>
             <button
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm sm:btn-md"
               onClick={() => navigate({ to: '/habits/create' })}
             >
               <PlusIcon size={20} />
-              New habit
+              <span className="hidden sm:inline">New habit</span>
             </button>
           </div>
         </div>
@@ -209,7 +215,7 @@ export const HabitTracker = () => {
               onChange={(e) => setLogNote(e.target.value)}
             />
           </div>
-          <span className="input input-bordered flex w-auto min-w-36 shrink-0 items-center">
+          <span className="input input-bordered flex w-full shrink-0 items-center sm:w-auto">
             {new Date(logDate + 'T00:00:00').toLocaleDateString(undefined, {
               weekday: 'short',
               month: 'short',

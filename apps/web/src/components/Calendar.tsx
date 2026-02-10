@@ -131,11 +131,23 @@ function MonthGrid({
   )
 }
 
-export const Calendar = ({ year, months, entries, selectedDate, onDateSelect }: CalendarProps) => {
-  const [mobileIndex, setMobileIndex] = useState(0)
+export const Calendar = ({
+  year,
+  months,
+  entries,
+  selectedDate,
+  onDateSelect,
+}: CalendarProps) => {
+  const [mobileIndex, setMobileIndex] = useState(() => {
+    const currentMonth = new Date().getMonth()
+    const idx = months.indexOf(currentMonth)
+    return idx >= 0 ? idx : 0
+  })
 
   useEffect(() => {
-    setMobileIndex(0)
+    const currentMonth = new Date().getMonth()
+    const idx = months.indexOf(currentMonth)
+    setMobileIndex(idx >= 0 ? idx : 0)
   }, [year, months[0]])
 
   return (

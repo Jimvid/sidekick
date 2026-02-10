@@ -1,5 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon, PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react'
+import {
+  ArrowLeftIcon,
+  PencilSimpleIcon,
+  TrashIcon,
+} from '@phosphor-icons/react'
 import { useDeleteHabit, useHabits } from '@/hooks/api/habits'
 
 export const HabitList = () => {
@@ -56,7 +60,10 @@ export const HabitList = () => {
               <button
                 className="btn btn-ghost btn-sm btn-circle"
                 onClick={() =>
-                  navigate({ to: '/habits/$habitId/edit', params: { habitId: habit.id } })
+                  navigate({
+                    to: '/habits/$habitId/edit',
+                    params: { habitId: habit.id },
+                  })
                 }
               >
                 <PencilSimpleIcon size={18} />

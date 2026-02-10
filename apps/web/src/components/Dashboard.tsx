@@ -1,10 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import {
-  ListIcon,
-  PencilIcon,
-  PlusIcon,
-} from '@phosphor-icons/react'
+import { ListIcon, PencilIcon, PlusIcon } from '@phosphor-icons/react'
 import { useHabits } from '@/hooks/api/habits'
 import { useHabitLogs } from '@/hooks/api/habitLogs'
 import { LogListItem } from '@/components/habits/LogListItem'
@@ -63,90 +59,100 @@ export function Dashboard() {
   const hasLogs = habitLogs && habitLogs.length > 0
 
   return (
-    <div className="min-h-[calc(100vh-88px)] flex flex-col p-6">
+    <div className="min-h-[calc(100vh-88px)] flex flex-col p-4 sm:p-6">
       <div className="mx-auto w-full max-w-6xl space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-base-content">Dashboard</h1>
-        <p className="text-sm text-base-content/60">Your habit overview</p>
-      </div>
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-base-content">Dashboard</h1>
+          <p className="text-sm text-base-content/60">Your habit overview</p>
+        </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <button
-          className="flex items-center gap-3 rounded-lg border border-base-content/10 p-4 text-left transition-colors hover:bg-base-200/60"
-          onClick={() => navigate({ to: '/habits/create' })}
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <PlusIcon size={20} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-base-content">New habit</p>
-            <p className="text-xs text-base-content/50">Create a habit to track</p>
-          </div>
-        </button>
-        <button
-          className="flex items-center gap-3 rounded-lg border border-base-content/10 p-4 text-left transition-colors hover:bg-base-200/60"
-          onClick={() => navigate({ to: '/habits/logs' })}
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">
-            <PlusIcon size={20} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-base-content">Log habit</p>
-            <p className="text-xs text-base-content/50">Record today's activity</p>
-          </div>
-        </button>
-        <button
-          className="flex items-center gap-3 rounded-lg border border-base-content/10 p-4 text-left transition-colors hover:bg-base-200/60"
-          onClick={() => navigate({ to: '/habits/logs' })}
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-info/10 text-info">
-            <ListIcon size={20} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-base-content">View logs</p>
-            <p className="text-xs text-base-content/50">Browse all habit logs</p>
-          </div>
-        </button>
-        <button
-          className="flex items-center gap-3 rounded-lg border border-base-content/10 p-4 text-left transition-colors hover:bg-base-200/60"
-          onClick={() => navigate({ to: '/habits/manage' })}
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
-            <PencilIcon size={20} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-base-content">Manage habits</p>
-            <p className="text-xs text-base-content/50">Edit or delete habits</p>
-          </div>
-        </button>
-      </div>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <button
+            className="flex flex-col items-center gap-2 rounded-lg border border-base-content/10 p-3 text-center transition-colors hover:bg-base-200/60 sm:flex-row sm:items-center sm:gap-3 sm:p-4 sm:text-left"
+            onClick={() => navigate({ to: '/habits/create' })}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <PlusIcon size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-base-content">New habit</p>
+              <p className="hidden text-xs text-base-content/50 sm:block">
+                Create a habit to track
+              </p>
+            </div>
+          </button>
+          <button
+            className="flex flex-col items-center gap-2 rounded-lg border border-base-content/10 p-3 text-center transition-colors hover:bg-base-200/60 sm:flex-row sm:items-center sm:gap-3 sm:p-4 sm:text-left"
+            onClick={() => navigate({ to: '/habits/logs' })}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">
+              <PlusIcon size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-base-content">Log habit</p>
+              <p className="hidden text-xs text-base-content/50 sm:block">
+                Record today's activity
+              </p>
+            </div>
+          </button>
+          <button
+            className="flex flex-col items-center gap-2 rounded-lg border border-base-content/10 p-3 text-center transition-colors hover:bg-base-200/60 sm:flex-row sm:items-center sm:gap-3 sm:p-4 sm:text-left"
+            onClick={() => navigate({ to: '/habits/logs' })}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-info/10 text-info">
+              <ListIcon size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-base-content">View logs</p>
+              <p className="hidden text-xs text-base-content/50 sm:block">
+                Browse all habit logs
+              </p>
+            </div>
+          </button>
+          <button
+            className="flex flex-col items-center gap-2 rounded-lg border border-base-content/10 p-3 text-center transition-colors hover:bg-base-200/60 sm:flex-row sm:items-center sm:gap-3 sm:p-4 sm:text-left"
+            onClick={() => navigate({ to: '/habits/manage' })}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
+              <PencilIcon size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-base-content">
+                Manage habits
+              </p>
+              <p className="hidden text-xs text-base-content/50 sm:block">
+                Edit or delete habits
+              </p>
+            </div>
+          </button>
+        </div>
 
-      {/* Recent Activity */}
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-base-content/60">
-          Recent Activity
-        </h2>
-        {hasLogs ? (
-          <div className="space-y-2">
-            {recentHabitLogs.map((habitLog) => (
-              <LogListItem
-                key={habitLog.id}
-                habitLog={habitLog}
-                habit={habitLog.habit}
-                date={getRelativeDate(habitLog.date)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-lg border border-base-content/10 p-6 text-center">
-            <p className="text-sm text-base-content/50">
-              No activity yet. Log a habit to see it here.
-            </p>
-          </div>
-        )}
-      </section>
+        {/* Recent Activity */}
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-base-content/60">
+            Recent Activity
+          </h2>
+          {hasLogs ? (
+            <div className="space-y-2">
+              {recentHabitLogs.map((habitLog) => (
+                <LogListItem
+                  key={habitLog.id}
+                  habitLog={habitLog}
+                  habit={habitLog.habit}
+                  date={getRelativeDate(habitLog.date)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-base-content/10 p-6 text-center">
+              <p className="text-sm text-base-content/50">
+                No activity yet. Log a habit to see it here.
+              </p>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   )

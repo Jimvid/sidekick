@@ -44,14 +44,19 @@ export function HabitLogList({ limit, showFilters = true }: HabitLogListProps) {
     note: '',
   })
 
-  const habitMap = useMemo(() => new Map(habits.map((h) => [h.id, h])), [habits])
+  const habitMap = useMemo(
+    () => new Map(habits.map((h) => [h.id, h])),
+    [habits],
+  )
 
   const filteredHabitLogs = useMemo(() => {
     let result = habitLogs.filter((habitLog) => habitMap.has(habitLog.habitId))
 
     if (showFilters) {
       if (selectedHabitId) {
-        result = result.filter((habitLog) => habitLog.habitId === selectedHabitId)
+        result = result.filter(
+          (habitLog) => habitLog.habitId === selectedHabitId,
+        )
       }
       if (dateFrom) {
         result = result.filter((habitLog) => habitLog.date >= dateFrom)
@@ -71,11 +76,23 @@ export function HabitLogList({ limit, showFilters = true }: HabitLogListProps) {
     }
 
     return result
-  }, [habitLogs, selectedHabitId, dateFrom, dateTo, habitMap, showFilters, limit])
+  }, [
+    habitLogs,
+    selectedHabitId,
+    dateFrom,
+    dateTo,
+    habitMap,
+    showFilters,
+    limit,
+  ])
 
   const startEditing = (habitLog: HabitLog) => {
     setEditingId(habitLog.id)
-    setEditState({ habitId: habitLog.habitId, date: habitLog.date, note: habitLog.note })
+    setEditState({
+      habitId: habitLog.habitId,
+      date: habitLog.date,
+      note: habitLog.note,
+    })
   }
 
   const cancelEditing = () => {
@@ -235,7 +252,7 @@ export function HabitLogList({ limit, showFilters = true }: HabitLogListProps) {
   }
 
   return (
-    <div className="min-h-[calc(100vh-88px)] flex flex-col p-6">
+    <div className="min-h-[calc(100vh-88px)] flex flex-col p-4 sm:p-6">
       <div className="mx-auto w-full max-w-6xl space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
