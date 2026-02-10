@@ -17,7 +17,7 @@ export const HabitList = () => {
 
   return (
     <div className="min-h-[calc(100vh-88px)] flex flex-col p-6">
-      <div className="mx-auto w-full max-w-lg space-y-6">
+      <div className="mx-auto w-full max-w-6xl space-y-6">
         <div className="flex items-center gap-3">
           <button
             className="btn btn-ghost btn-sm btn-circle"

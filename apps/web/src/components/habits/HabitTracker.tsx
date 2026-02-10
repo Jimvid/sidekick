@@ -258,9 +258,17 @@ export const HabitTracker = () => {
 
         {/* Recent Log Entries */}
         <div>
-          <h2 className="mb-3 text-lg font-semibold text-base-content">
-            Last 7 Days
-          </h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-base-content">
+              Last 7 Days
+            </h2>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => navigate({ to: '/habits/logs' })}
+            >
+              View all logs
+            </button>
+          </div>
           <div className="flex flex-col gap-4">
             {sortedRecentDates.map((date) => {
               const dateLogs = recentLogs.get(date) ?? []

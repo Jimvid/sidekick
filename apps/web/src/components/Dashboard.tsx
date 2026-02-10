@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import {
   PlusIcon,
   PencilIcon,
+  ListIcon,
 } from '@phosphor-icons/react'
 import { useHabits } from '@/hooks/api/habits'
 import { useHabitLogs } from '@/hooks/api/habitLogs'
@@ -70,7 +71,7 @@ export function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <button
           className="flex items-center gap-3 rounded-lg border border-base-content/10 p-4 text-left transition-colors hover:bg-base-200/60"
           onClick={() => navigate({ to: '/habits/create' })}
@@ -85,7 +86,7 @@ export function Dashboard() {
         </button>
         <button
           className="flex items-center gap-3 rounded-lg border border-base-content/10 p-4 text-left transition-colors hover:bg-base-200/60"
-          onClick={() => navigate({ to: '/habits' })}
+          onClick={() => navigate({ to: '/habits/logs' })}
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">
             <PlusIcon size={20} />
@@ -93,6 +94,18 @@ export function Dashboard() {
           <div>
             <p className="text-sm font-medium text-base-content">Log habit</p>
             <p className="text-xs text-base-content/50">Record today's activity</p>
+          </div>
+        </button>
+        <button
+          className="flex items-center gap-3 rounded-lg border border-base-content/10 p-4 text-left transition-colors hover:bg-base-200/60"
+          onClick={() => navigate({ to: '/habits/logs' })}
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-info/10 text-info">
+            <ListIcon size={20} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-base-content">View logs</p>
+            <p className="text-xs text-base-content/50">Browse all habit logs</p>
           </div>
         </button>
         <button

@@ -19,6 +19,7 @@ import { Route as ProtectedHabitsRouteImport } from './routes/_protected/habits'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 import { Route as ProtectedHabitsIndexRouteImport } from './routes/_protected/habits/index'
 import { Route as ProtectedHabitsManageRouteImport } from './routes/_protected/habits/manage'
+import { Route as ProtectedHabitsLogsRouteImport } from './routes/_protected/habits/logs'
 import { Route as ProtectedHabitsCreateRouteImport } from './routes/_protected/habits/create'
 import { Route as ProtectedHabitsHabitIdEditRouteImport } from './routes/_protected/habits/$habitId.edit'
 
@@ -71,6 +72,11 @@ const ProtectedHabitsManageRoute = ProtectedHabitsManageRouteImport.update({
   path: '/manage',
   getParentRoute: () => ProtectedHabitsRoute,
 } as any)
+const ProtectedHabitsLogsRoute = ProtectedHabitsLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => ProtectedHabitsRoute,
+} as any)
 const ProtectedHabitsCreateRoute = ProtectedHabitsCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/habits': typeof ProtectedHabitsRouteWithChildren
   '/profile': typeof ProtectedProfileRoute
   '/habits/create': typeof ProtectedHabitsCreateRoute
+  '/habits/logs': typeof ProtectedHabitsLogsRoute
   '/habits/manage': typeof ProtectedHabitsManageRoute
   '/habits/': typeof ProtectedHabitsIndexRoute
   '/habits/$habitId/edit': typeof ProtectedHabitsHabitIdEditRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof ProtectedDashboardRoute
   '/profile': typeof ProtectedProfileRoute
   '/habits/create': typeof ProtectedHabitsCreateRoute
+  '/habits/logs': typeof ProtectedHabitsLogsRoute
   '/habits/manage': typeof ProtectedHabitsManageRoute
   '/habits': typeof ProtectedHabitsIndexRoute
   '/habits/$habitId/edit': typeof ProtectedHabitsHabitIdEditRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/_protected/habits': typeof ProtectedHabitsRouteWithChildren
   '/_protected/profile': typeof ProtectedProfileRoute
   '/_protected/habits/create': typeof ProtectedHabitsCreateRoute
+  '/_protected/habits/logs': typeof ProtectedHabitsLogsRoute
   '/_protected/habits/manage': typeof ProtectedHabitsManageRoute
   '/_protected/habits/': typeof ProtectedHabitsIndexRoute
   '/_protected/habits/$habitId/edit': typeof ProtectedHabitsHabitIdEditRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/habits'
     | '/profile'
     | '/habits/create'
+    | '/habits/logs'
     | '/habits/manage'
     | '/habits/'
     | '/habits/$habitId/edit'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/profile'
     | '/habits/create'
+    | '/habits/logs'
     | '/habits/manage'
     | '/habits'
     | '/habits/$habitId/edit'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/_protected/habits'
     | '/_protected/profile'
     | '/_protected/habits/create'
+    | '/_protected/habits/logs'
     | '/_protected/habits/manage'
     | '/_protected/habits/'
     | '/_protected/habits/$habitId/edit'
@@ -245,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedHabitsManageRouteImport
       parentRoute: typeof ProtectedHabitsRoute
     }
+    '/_protected/habits/logs': {
+      id: '/_protected/habits/logs'
+      path: '/logs'
+      fullPath: '/habits/logs'
+      preLoaderRoute: typeof ProtectedHabitsLogsRouteImport
+      parentRoute: typeof ProtectedHabitsRoute
+    }
     '/_protected/habits/create': {
       id: '/_protected/habits/create'
       path: '/create'
@@ -264,6 +283,7 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedHabitsRouteChildren {
   ProtectedHabitsCreateRoute: typeof ProtectedHabitsCreateRoute
+  ProtectedHabitsLogsRoute: typeof ProtectedHabitsLogsRoute
   ProtectedHabitsManageRoute: typeof ProtectedHabitsManageRoute
   ProtectedHabitsIndexRoute: typeof ProtectedHabitsIndexRoute
   ProtectedHabitsHabitIdEditRoute: typeof ProtectedHabitsHabitIdEditRoute
@@ -271,6 +291,7 @@ interface ProtectedHabitsRouteChildren {
 
 const ProtectedHabitsRouteChildren: ProtectedHabitsRouteChildren = {
   ProtectedHabitsCreateRoute: ProtectedHabitsCreateRoute,
+  ProtectedHabitsLogsRoute: ProtectedHabitsLogsRoute,
   ProtectedHabitsManageRoute: ProtectedHabitsManageRoute,
   ProtectedHabitsIndexRoute: ProtectedHabitsIndexRoute,
   ProtectedHabitsHabitIdEditRoute: ProtectedHabitsHabitIdEditRoute,
