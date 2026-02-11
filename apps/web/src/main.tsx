@@ -25,3 +25,23 @@ if (rootElement && !rootElement.innerHTML) {
 }
 
 reportWebVitals()
+
+// Register service worker (production only, handled by vite-plugin-pwa)
+if ('serviceWorker' in navigator) {
+  import('virtual:pwa-register').then(({ registerSW }) => {
+    registerSW({
+      immediate: false,
+      onRegisteredSW(_swUrl, registration) {
+        if (registration) {
+          // Check for updates every hour
+          setInterval(
+            () => {
+              registration.update()
+            },
+            60 * 60 * 1000,
+          )
+        }
+      },
+    })
+  })
+}

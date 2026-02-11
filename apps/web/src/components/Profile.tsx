@@ -1,5 +1,5 @@
 import { useAuth, useUser } from '@clerk/clerk-react'
-import { CalendarIcon, EnvelopeIcon, SignOutIcon, UserIcon } from '@phosphor-icons/react'
+import { ArrowsClockwiseIcon, CalendarIcon, EnvelopeIcon, SignOutIcon, UserIcon } from '@phosphor-icons/react'
 
 export const Profile = () => {
   const { user } = useUser()
@@ -72,6 +72,24 @@ export const Profile = () => {
             </div>
           </div>
         </div>
+        <button
+          onClick={async () => {
+            // Tell the service worker to clear its caches
+            if ('serviceWorker' in navigator) {
+              const registration = await navigator.serviceWorker.ready
+              registration.active?.postMessage({ type: 'CLEAR_CACHE' })
+              await registration.unregister()
+            }
+            // Fallback: clear caches directly
+            const names = await caches.keys()
+            await Promise.all(names.map((name) => caches.delete(name)))
+            window.location.reload()
+          }}
+          className="btn btn-outline btn-warning w-full"
+        >
+          <ArrowsClockwiseIcon size={20} />
+          Clear Cache & Reload
+        </button>
         <button onClick={handleSignOut} className="btn btn-primary w-full">
           <SignOutIcon size={20} />
           Sign Out

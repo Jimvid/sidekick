@@ -271,25 +271,25 @@ export function HabitLogList({ limit, showFilters = true }: HabitLogListProps) {
         </div>
 
         {/* Filter bar */}
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="form-control w-full sm:w-48">
-            <label className="label">
-              <span className="label-text">Habit</span>
-            </label>
-            <select
-              className="select select-bordered w-full"
-              value={selectedHabitId}
-              onChange={(e) => setSelectedHabitId(e.target.value)}
-            >
-              <option value="">All habits</option>
-              {habits.map((h) => (
-                <option key={h.id} value={h.id}>
-                  {h.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-end justify-between gap-3">
+            <div className="form-control w-full sm:w-48">
+              <label className="label">
+                <span className="label-text">Habit</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={selectedHabitId}
+                onChange={(e) => setSelectedHabitId(e.target.value)}
+              >
+                <option value="">All habits</option>
+                {habits.map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {h.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button
               className={`btn btn-ghost btn-sm${hasFilters ? '' : ' invisible'}`}
               onClick={() => {
@@ -300,28 +300,28 @@ export function HabitLogList({ limit, showFilters = true }: HabitLogListProps) {
             >
               Clear filters
             </button>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">From</span>
-              </label>
-              <input
-                type="date"
-                className="input input-bordered"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">To</span>
-              </label>
-              <input
-                type="date"
-                className="input input-bordered"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-              />
-            </div>
+          </div>
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text">From</span>
+            </label>
+            <input
+              type="date"
+              className="input input-bordered w-full"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
+          </div>
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text">To</span>
+            </label>
+            <input
+              type="date"
+              className="input input-bordered w-full"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
           </div>
         </div>
 

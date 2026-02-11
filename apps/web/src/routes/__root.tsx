@@ -1,6 +1,7 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanstackDevtools } from '@tanstack/react-devtools'
+import { PwaUpdatePrompt } from '@/components/PwaUpdatePrompt'
 
 interface AuthState {
   isSignedIn: boolean
@@ -16,6 +17,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <div data-theme="rosepine">
       <Outlet />
+      <PwaUpdatePrompt />
       {import.meta.env.DEV && (
         <TanstackDevtools
           config={{
