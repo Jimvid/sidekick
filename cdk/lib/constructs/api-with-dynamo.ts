@@ -11,7 +11,6 @@ import { EnvironmentConfig } from "../config";
 
 interface ApiStackProps extends cdk.StackProps {
   domainName: string;
-  certificate: acm.ICertificate;
   config: EnvironmentConfig;
 }
 
@@ -38,17 +37,22 @@ export class ApiWithDynamo extends Construct {
     });
 
     // Setup domain
-    const { domainName, certificate } = props;
+    const { domainName } = props;
     const rootDomain = domainName.split(".").slice(-2).join(".");
     const subdomainPart = domainName.replace(`.${rootDomain}`, "");
     const hostedZone = route53.HostedZone.fromLookup(this, "HostedZone", {
       domainName: rootDomain,
     });
 
+    const certificate = new acm.Certificate(this, "ApiCertificate", {
+      domainName: domainName,
+      validation: acm.CertificateValidation.fromDns(hostedZone),
+    });
+
     const customDomain = new apigateway.DomainName(this, "CustomDomain", {
       domainName: props.domainName,
       certificate: certificate,
-      endpointType: apigateway.EndpointType.EDGE,
+      endpointType: apigateway.EndpointType.REGIONAL,
     });
 
     // Lambda - API

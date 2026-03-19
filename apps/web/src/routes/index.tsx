@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { LoginPage } from './login'
 
 export const Route = createFileRoute('/')({
   beforeLoad: ({ context }) => {
@@ -6,9 +7,5 @@ export const Route = createFileRoute('/')({
       throw redirect({ to: '/dashboard' })
     }
   },
-  component: LandingPage,
+  component: LoginPage,
 })
-
-function LandingPage() {
-  return <div className="min-h-screen bg-base-100 flex flex-col">sidekick</div>
-}

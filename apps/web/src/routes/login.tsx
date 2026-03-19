@@ -5,7 +5,7 @@ export const Route = createFileRoute('/login')({
   component: LoginPage,
 })
 
-function LoginPage() {
+export function LoginPage() {
   const { signIn } = useSignIn()
 
   const handleGoogleSignIn = () => {

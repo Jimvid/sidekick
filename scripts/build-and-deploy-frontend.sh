@@ -30,23 +30,29 @@ fi
 
 print_status "Deploying to $ENV environment"
 
-# Determine stack name
+# Get the repo root relative to this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Determine stack names
 if [ "$ENV" == "prod" ]; then
     STACK_NAME="SidekickFrontend"
+    CERT_STACK_NAME="SidekickCertificate"
 else
     STACK_NAME="SidekickFrontend-${ENV}"
+    CERT_STACK_NAME="SidekickCertificate-${ENV}"
 fi
 
 # Build frontend
 print_status "Building frontend..."
-cd ../apps/web
+cd "$REPO_ROOT/apps/web"
 npm ci  # Use ci for faster, more reliable installs
-npm run build
+npm run build -- --mode $ENV
 print_success "Frontend build complete"
 
 # Build and deploy CDK
 print_status "Building CDK..."
-cd ../../cdk
+cd "$REPO_ROOT/cdk"
 npm ci
 print_success "CDK dependencies installed"
 
@@ -54,6 +60,6 @@ print_status "Synthesizing CDK stack..."
 npx cdk synth --context env=$ENV
 
 print_status "Deploying CDK stack: $STACK_NAME..."
-npx cdk deploy $STACK_NAME --context env=$ENV --require-approval never
+npx cdk deploy $CERT_STACK_NAME $STACK_NAME --context env=$ENV --require-approval never
 
 print_success "Deployment complete!"

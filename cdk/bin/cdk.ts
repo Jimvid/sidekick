@@ -42,10 +42,8 @@ new FrontendStack(app, `SidekickFrontend${suffix}`, {
 // Api stack includes the DynamoDB table
 new ApiStack(app, `SidekickApi${suffix}`, {
   config,
-  certificate: sharedCert.certificate,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
-  crossRegionReferences: true,
 });
