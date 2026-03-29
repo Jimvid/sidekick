@@ -8,6 +8,7 @@ import {
 import { useNavigate } from '@tanstack/react-router'
 import type { Habit, HabitLog, QuarterInfo } from '@/types/habits'
 import { Calendar } from '@/components/Calendar'
+import { DateDetail } from '@/components/habits/DateDetail'
 import { HabitLogList } from '@/components/habits/HabitLogList'
 import { useHabits } from '@/hooks/api/habits'
 import { useCreateHabitLog, useHabitLogs } from '@/hooks/api/habitLogs'
@@ -78,6 +79,13 @@ export const HabitTracker = () => {
   const entries = useMemo(
     () => buildCalendarEntries(habitLogs, habits),
     [habitLogs, habits],
+  )
+
+  const habitMap = useMemo(() => new Map(habits.map((h) => [h.id, h])), [habits])
+
+  const selectedDateLogs = useMemo(
+    () => habitLogs.filter((log) => log.date === logDate),
+    [habitLogs, logDate],
   )
 
   const navigateQuarter = (direction: -1 | 1) => {
@@ -243,6 +251,9 @@ export const HabitTracker = () => {
           selectedDate={logDate}
           onDateSelect={setLogDate}
         />
+
+        {/* Selected Date Detail */}
+        <DateDetail date={logDate} logs={selectedDateLogs} habitMap={habitMap} />
 
         {/* Recent Log Entries */}
         <div>

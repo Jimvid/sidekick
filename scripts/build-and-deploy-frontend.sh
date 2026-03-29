@@ -47,7 +47,7 @@ fi
 print_status "Building frontend..."
 cd "$REPO_ROOT/apps/web"
 npm ci  # Use ci for faster, more reliable installs
-npm run build -- --mode $ENV
+npx vite build --mode $ENV && npx tsc
 print_success "Frontend build complete"
 
 # Build and deploy CDK
